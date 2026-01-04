@@ -83,8 +83,3 @@ lerna-debug.log*
 .DS_Store
 Thumbs.db
 
-# =========================
-# Docker
-.dockerignore
-# ========================
-
