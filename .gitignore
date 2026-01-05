@@ -45,8 +45,6 @@ files/resumes/*
 logs/
 
 # Secrets / Env
-.env
-.env.*
 *.secret
 *.key
 
