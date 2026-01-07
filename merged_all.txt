@@ -1525,6 +1525,274 @@ export default function ProtectedRoute({ children, adminOnly = false }) {
 }
 --- END: FrontEnd/src/components/ProtectedRoute.jsx ---
 
+--- START: Devops/k8s/MySQL/deployment.yaml ---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: mysql-deployment
+  labels:
+    app: mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:5.7
+        ports:
+        - containerPort: 3306
+        envFrom:
+        - secretRef:
+            name: db-credentials
+        volumeMounts:
+        - name: mysql-pvc
+          mountPath: /var/lib/mysql
+
+        livenessProbe:
+          exec:
+            command:
+            - mysqladmin
+            - ping
+            - -h
+            - localhost
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+            - mysqladmin
+            - ping
+            - -h
+            - localhost
+          initialDelaySeconds: 15
+          periodSeconds: 5
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1"    
+      volumes:
+      - name: mysql-pvc
+        persistentVolumeClaim:
+          claimName: mysql-pvc
+      
+--- END: Devops/k8s/MySQL/deployment.yaml ---
+
+--- START: Devops/k8s/MySQL/pvc.yaml ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pvc
+  namespace: DecSecJobs
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: standard
+--- END: Devops/k8s/MySQL/pvc.yaml ---
+
+--- START: Devops/k8s/MySQL/service.yaml ---
+
+--- END: Devops/k8s/MySQL/service.yaml ---
+
+--- START: Devops/k8s/Map_Secrets/configmaps.yaml ---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: backend-config
+  namespace: DecSecJobs
+data:
+  FLASK_ENV: "production"
+  FLASK_DEBUG: "0"
+  PORT: "5001"
+  JWT_ACCESS_EXPIRES_MIN: "60"
+  JWT_REFRESH_EXPIRES_DAYS: "7"
+  CORS_ORIGINS: "http://frontend:80"
+
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: frontend-config
+  namespace: DecSecJobs
+data:
+  VITE_API_BASE_URL: "http://backend:5001/api"
+
+--- END: Devops/k8s/Map_Secrets/configmaps.yaml ---
+
+--- START: Devops/k8s/Map_Secrets/secrets.yaml ---
+kind: Secret
+apiVersion: v1
+metadata:
+  name: db-credentials
+  namespace: DecSecJobs
+type: Opaque
+data:
+  DB_USER: cm9vdA==              # root
+  DB_PASSWORD: cGFzc3dvcmQ=      # password
+  DB_HOST: bXlzcWw=              # mysql (שם ה-service!)
+  DB_NAME: ZGV2c2Vjb3BzMjBiaXU=  # devsecops20biu
+
+---
+kind: Secret
+apiVersion: v1
+metadata:
+  name: jwt-secret
+  namespace: DecSecJobs
+type: Opaque
+data:
+  JWT_SECRET_KEY: c2VjdXJlX2tleV9mb3Jfand0 # secure_key_for_jwt  
+--- END: Devops/k8s/Map_Secrets/secrets.yaml ---
+
+--- START: Devops/k8s/Frontend/deployment.yaml ---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: frontend-deployment
+  namespace: DecSecJobs
+  labels:
+    app: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: nery28/my-app-frontend:latest
+          ports:
+            - containerPort: 80
+          envFrom:
+            - configMapRef:
+                name: frontend-config
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+--- END: Devops/k8s/Frontend/deployment.yaml ---
+
+--- START: Devops/k8s/Frontend/service.yaml ---
+kind: Service
+apiVersion: v1
+metadata:
+  name: frontend-service
+  namespace: DecSecJobs
+spec:
+  selector:
+    app: frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: ClusterIP
+--- END: Devops/k8s/Frontend/service.yaml ---
+
+--- START: Devops/k8s/Backend/deployment.yaml ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+  namespace: DecSecJobs
+  labels:
+    app: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: nery28/my-app-backend:latest
+
+          ports:
+            - containerPort: 5001
+
+          envFrom:
+            - configMapRef:
+                name: backend-config
+            - secretRef:
+                name: db-credentials
+            - secretRef:
+                name: jwt-secret
+
+          env:
+            - name: DATABASE_URL
+              value: "mysql+pymysql://$(DB_USER):$(DB_PASSWORD)@$(DB_HOST):3306/$(DB_NAME)?charset=utf8mb4"
+
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5001
+            initialDelaySeconds: 10
+            periodSeconds: 20
+
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5001
+            initialDelaySeconds: 5
+            periodSeconds: 10
+
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+--- END: Devops/k8s/Backend/deployment.yaml ---
+
+--- START: Devops/k8s/Backend/service.yaml ---
+kind: Service
+apiVersion: v1
+metadata:
+  name: backend-service
+  namespace: DecSecJobs
+spec:
+  selector:
+    app: backend
+  ports:
+    - protocol: TCP
+      port: 5001
+      targetPort: 5001
+  type: ClusterIP
+--- END: Devops/k8s/Backend/service.yaml ---
+
 --- START: Backend/Dockerfile ---
 FROM python:3.12-alpine
 WORKDIR /app
