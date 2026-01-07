@@ -16,7 +16,7 @@ kind: ConfigMap
 apiVersion: v1
 metadata:
   name: frontend-config
-  namespace: DecSecJobs
+  namespace: DevSecJobs
 data:
-  VITE_API_BASE_URL: "http://backend:5001/api"
+  VITE_API_BASE_URL: "http://backend-service:5001"
 

@@ -2,7 +2,7 @@ kind: Service
 apiVersion: v1
 metadata:
   name: backend-service
-  namespace: DecSecJobs
+  namespace: DevSecJobs
 spec:
   selector:
     app: backend

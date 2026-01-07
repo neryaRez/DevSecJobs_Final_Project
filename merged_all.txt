@@ -1530,6 +1530,7 @@ kind: Deployment
 apiVersion: apps/v1
 metadata:
   name: mysql-deployment
+  namespace: DevSecJobs
   labels:
     app: mysql
 spec:
@@ -1547,44 +1548,74 @@ spec:
         image: mysql:5.7
         ports:
         - containerPort: 3306
-        envFrom:
-        - secretRef:
-            name: db-credentials
-        volumeMounts:
-        - name: mysql-pvc
-          mountPath: /var/lib/mysql
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: DB_PASSWORD
 
-        livenessProbe:
-          exec:
-            command:
-            - mysqladmin
-            - ping
-            - -h
-            - localhost
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          exec:
-            command:
-            - mysqladmin
-            - ping
-            - -h
-            - localhost
-          initialDelaySeconds: 15
-          periodSeconds: 5
-        resources:
-          requests:
-            memory: "512Mi"
-            cpu: "500m"
-          limits:
-            memory: "1Gi"
-            cpu: "1"    
+            - name: MYSQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: DB_NAME
+
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: DB_USER
+
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: DB_PASSWORD
+
+          volumeMounts:
+            - name: mysql-pvc
+              mountPath: /var/lib/mysql
+
+          livenessProbe:
+            exec:
+              command: ["sh", "-c", "mysqladmin ping -h 127.0.0.1 -p$MYSQL_ROOT_PASSWORD"]
+            initialDelaySeconds: 30
+            periodSeconds: 10
+
+          readinessProbe:
+            exec:
+              command: ["sh", "-c", "mysqladmin ping -h 127.0.0.1 -p$MYSQL_ROOT_PASSWORD"]
+            initialDelaySeconds: 15
+            periodSeconds: 5
+
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1"
+
       volumes:
-      - name: mysql-pvc
-        persistentVolumeClaim:
-          claimName: mysql-pvc
+        - name: mysql-pvc
+          persistentVolumeClaim:
+            claimName: mysql-pvc
       
 --- END: Devops/k8s/MySQL/deployment.yaml ---
+
+--- START: Devops/k8s/MySQL/pdb.yaml ---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: db-pdb
+  namespace: DevSecJobs
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: mysql
+--- END: Devops/k8s/MySQL/pdb.yaml ---
 
 --- START: Devops/k8s/MySQL/pvc.yaml ---
 apiVersion: v1
@@ -1602,8 +1633,52 @@ spec:
 --- END: Devops/k8s/MySQL/pvc.yaml ---
 
 --- START: Devops/k8s/MySQL/service.yaml ---
-
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-service
+  namespace: DevSecJobs
+spec:
+  selector:
+    app: mysql
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
+  type: ClusterIP
 --- END: Devops/k8s/MySQL/service.yaml ---
+
+--- START: Devops/k8s/Ingress/ingress.yaml ---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: DevSecJobs-ingress
+  namespace: DevSecJobs
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: devsecjobs.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend-service
+            port:
+              number: 80
+  - host: api.devsecjobs.local
+    http:
+      paths:            
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-service
+            port:
+              number: 80
+--- END: Devops/k8s/Ingress/ingress.yaml ---
 
 --- START: Devops/k8s/Map_Secrets/configmaps.yaml ---
 kind: ConfigMap
@@ -1617,7 +1692,7 @@ data:
   PORT: "5001"
   JWT_ACCESS_EXPIRES_MIN: "60"
   JWT_REFRESH_EXPIRES_DAYS: "7"
-  CORS_ORIGINS: "http://frontend:80"
+  CORS_ORIGINS: "*"
 
 ---
 kind: ConfigMap
@@ -1701,6 +1776,19 @@ spec:
               cpu: "200m"
 --- END: Devops/k8s/Frontend/deployment.yaml ---
 
+--- START: Devops/k8s/Frontend/pdb.yaml ---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: frontend-pdb
+  namespace: DevSecJobs
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: frontend
+--- END: Devops/k8s/Frontend/pdb.yaml ---
+
 --- START: Devops/k8s/Frontend/service.yaml ---
 kind: Service
 apiVersion: v1
@@ -1776,6 +1864,19 @@ spec:
               memory: "512Mi"
               cpu: "500m"
 --- END: Devops/k8s/Backend/deployment.yaml ---
+
+--- START: Devops/k8s/Backend/pdb.yaml ---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: backend-pdb
+  namespace: DevSecJobs
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: backend
+--- END: Devops/k8s/Backend/pdb.yaml ---
 
 --- START: Devops/k8s/Backend/service.yaml ---
 kind: Service
