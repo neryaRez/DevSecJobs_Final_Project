@@ -1548,48 +1548,43 @@ spec:
         image: mysql:5.7
         ports:
         - containerPort: 3306
-          env:
-            - name: MYSQL_ROOT_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: db-credentials
-                  key: DB_PASSWORD
-
-            - name: MYSQL_DATABASE
-              valueFrom:
-                secretKeyRef:
-                  name: db-credentials
-                  key: DB_NAME
-
-            - name: MYSQL_USER
-              valueFrom:
-                secretKeyRef:
-                  name: db-credentials
-                  key: DB_USER
-
-            - name: MYSQL_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: db-credentials
-                  key: DB_PASSWORD
-
-          volumeMounts:
+        env:
+          - name: MYSQL_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: db-credentials
+                key: DB_PASSWORD
+          - name: MYSQL_DATABASE
+            valueFrom:
+              secretKeyRef:
+                name: db-credentials
+                key: DB_NAME
+          - name: MYSQL_USER
+            valueFrom:
+              secretKeyRef:
+                name: db-credentials
+                key: DB_USER
+          - name: MYSQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: db-credentials
+                key: DB_PASSWORD
+          
+        volumeMounts:
             - name: mysql-pvc
               mountPath: /var/lib/mysql
 
-          livenessProbe:
-            exec:
-              command: ["sh", "-c", "mysqladmin ping -h 127.0.0.1 -p$MYSQL_ROOT_PASSWORD"]
-            initialDelaySeconds: 30
-            periodSeconds: 10
-
-          readinessProbe:
-            exec:
-              command: ["sh", "-c", "mysqladmin ping -h 127.0.0.1 -p$MYSQL_ROOT_PASSWORD"]
-            initialDelaySeconds: 15
-            periodSeconds: 5
-
-          resources:
+        livenessProbe:
+          exec:
+            command: ["sh", "-c", "mysqladmin ping -h 127.0.0.1 -p$MYSQL_ROOT_PASSWORD"]
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command: ["sh", "-c", "mysqladmin ping -h 127.0.0.1 -p$MYSQL_ROOT_PASSWORD"]
+          initialDelaySeconds: 15
+          periodSeconds: 5
+        resources:
             requests:
               memory: "512Mi"
               cpu: "500m"
@@ -1622,7 +1617,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: mysql-pvc
-  namespace: DecSecJobs
+  namespace: DevSecJobs
 spec:
   accessModes:
     - ReadWriteOnce
@@ -1677,7 +1672,7 @@ spec:
           service:
             name: backend-service
             port:
-              number: 80
+              number: 5001
 --- END: Devops/k8s/Ingress/ingress.yaml ---
 
 --- START: Devops/k8s/Map_Secrets/configmaps.yaml ---
@@ -1685,7 +1680,7 @@ kind: ConfigMap
 apiVersion: v1
 metadata:
   name: backend-config
-  namespace: DecSecJobs
+  namespace: DevSecJobs
 data:
   FLASK_ENV: "production"
   FLASK_DEBUG: "0"
@@ -1699,9 +1694,9 @@ kind: ConfigMap
 apiVersion: v1
 metadata:
   name: frontend-config
-  namespace: DecSecJobs
+  namespace: DevSecJobs
 data:
-  VITE_API_BASE_URL: "http://backend:5001/api"
+  VITE_API_BASE_URL: "http://backend-service:5001"
 
 --- END: Devops/k8s/Map_Secrets/configmaps.yaml ---
 
@@ -1710,12 +1705,12 @@ kind: Secret
 apiVersion: v1
 metadata:
   name: db-credentials
-  namespace: DecSecJobs
+  namespace: DevSecJobs
 type: Opaque
 data:
   DB_USER: cm9vdA==              # root
   DB_PASSWORD: cGFzc3dvcmQ=      # password
-  DB_HOST: bXlzcWw=              # mysql (שם ה-service!)
+  DB_HOST: bXlzcWwtc2VydmljZQ==  # mysql-service
   DB_NAME: ZGV2c2Vjb3BzMjBiaXU=  # devsecops20biu
 
 ---
@@ -1723,7 +1718,7 @@ kind: Secret
 apiVersion: v1
 metadata:
   name: jwt-secret
-  namespace: DecSecJobs
+  namespace: DevSecJobs
 type: Opaque
 data:
   JWT_SECRET_KEY: c2VjdXJlX2tleV9mb3Jfand0 # secure_key_for_jwt  
@@ -1734,7 +1729,7 @@ kind: Deployment
 apiVersion: apps/v1
 metadata:
   name: frontend-deployment
-  namespace: DecSecJobs
+  namespace: DevSecJobs
   labels:
     app: frontend
 spec:
@@ -1751,20 +1746,20 @@ spec:
         - name: frontend
           image: nery28/my-app-frontend:latest
           ports:
-            - containerPort: 80
+            - containerPort: 5173
           envFrom:
             - configMapRef:
                 name: frontend-config
           livenessProbe:
             httpGet:
               path: /
-              port: 80
+              port: 5173
             initialDelaySeconds: 10
             periodSeconds: 20
           readinessProbe:
             httpGet:
               path: /
-              port: 80
+              port: 5173
             initialDelaySeconds: 5
             periodSeconds: 10
           resources:
@@ -1794,14 +1789,14 @@ kind: Service
 apiVersion: v1
 metadata:
   name: frontend-service
-  namespace: DecSecJobs
+  namespace: DevSecJobs
 spec:
   selector:
     app: frontend
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 80
+      targetPort: 5713
   type: ClusterIP
 --- END: Devops/k8s/Frontend/service.yaml ---
 
@@ -1810,7 +1805,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: backend-deployment
-  namespace: DecSecJobs
+  namespace: DevSecJobs
   labels:
     app: backend
 spec:
@@ -1883,7 +1878,7 @@ kind: Service
 apiVersion: v1
 metadata:
   name: backend-service
-  namespace: DecSecJobs
+  namespace: DevSecJobs
 spec:
   selector:
     app: backend

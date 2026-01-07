@@ -5,7 +5,7 @@ from extensions import db
 from Models.applicant import Applicant
 
 applicants_bp = Blueprint("applicants", __name__)
-@applicants_bp.get("")
+@applicants_bp.get("/")
 def applicants_list_jobs():
     rows = Applicant.query.order_by(Applicant.id.desc()).all()
     return jsonify([
