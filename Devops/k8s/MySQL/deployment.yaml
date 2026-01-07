@@ -2,7 +2,7 @@ kind: Deployment
 apiVersion: apps/v1
 metadata:
   name: mysql-deployment
-  namespace: DevSecJobs
+  namespace: devsecjobs
   labels:
     app: mysql
 spec:
@@ -25,22 +25,22 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: db-credentials
-                key: DB_PASSWORD
+                key: MYSQL_ROOT_PASSWORD
           - name: MYSQL_DATABASE
             valueFrom:
               secretKeyRef:
                 name: db-credentials
-                key: DB_NAME
+                key: MYSQL_DATABASE
           - name: MYSQL_USER
             valueFrom:
               secretKeyRef:
                 name: db-credentials
-                key: DB_USER
+                key: MYSQL_USER
           - name: MYSQL_PASSWORD
             valueFrom:
               secretKeyRef:
                 name: db-credentials
-                key: DB_PASSWORD
+                key: MYSQL_PASSWORD
           
         volumeMounts:
             - name: mysql-pvc

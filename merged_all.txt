@@ -1530,7 +1530,7 @@ kind: Deployment
 apiVersion: apps/v1
 metadata:
   name: mysql-deployment
-  namespace: DevSecJobs
+  namespace: devsecjobs
   labels:
     app: mysql
 spec:
@@ -1604,7 +1604,7 @@ apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: db-pdb
-  namespace: DevSecJobs
+  namespace: devsecjobs
 spec:
   minAvailable: 1
   selector:
@@ -1617,7 +1617,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: mysql-pvc
-  namespace: DevSecJobs
+  namespace: devsecjobs
 spec:
   accessModes:
     - ReadWriteOnce
@@ -1632,7 +1632,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: mysql-service
-  namespace: DevSecJobs
+  namespace: devsecjobs
 spec:
   selector:
     app: mysql
@@ -1648,7 +1648,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: DevSecJobs-ingress
-  namespace: DevSecJobs
+  namespace: devsecjobs
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
@@ -1680,7 +1680,7 @@ kind: ConfigMap
 apiVersion: v1
 metadata:
   name: backend-config
-  namespace: DevSecJobs
+  namespace: devsecjobs
 data:
   FLASK_ENV: "production"
   FLASK_DEBUG: "0"
@@ -1694,7 +1694,7 @@ kind: ConfigMap
 apiVersion: v1
 metadata:
   name: frontend-config
-  namespace: DevSecJobs
+  namespace: devsecjobs
 data:
   VITE_API_BASE_URL: "http://backend-service:5001"
 
@@ -1705,7 +1705,7 @@ kind: Secret
 apiVersion: v1
 metadata:
   name: db-credentials
-  namespace: DevSecJobs
+  namespace: devsecjobs
 type: Opaque
 data:
   DB_USER: cm9vdA==              # root
@@ -1718,7 +1718,7 @@ kind: Secret
 apiVersion: v1
 metadata:
   name: jwt-secret
-  namespace: DevSecJobs
+  namespace: devsecjobs
 type: Opaque
 data:
   JWT_SECRET_KEY: c2VjdXJlX2tleV9mb3Jfand0 # secure_key_for_jwt  
@@ -1729,7 +1729,7 @@ kind: Deployment
 apiVersion: apps/v1
 metadata:
   name: frontend-deployment
-  namespace: DevSecJobs
+  namespace: devsecjobs
   labels:
     app: frontend
 spec:
@@ -1776,7 +1776,7 @@ apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: frontend-pdb
-  namespace: DevSecJobs
+  namespace: devsecjobs
 spec:
   minAvailable: 1
   selector:
@@ -1789,7 +1789,7 @@ kind: Service
 apiVersion: v1
 metadata:
   name: frontend-service
-  namespace: DevSecJobs
+  namespace: devsecjobs
 spec:
   selector:
     app: frontend
@@ -1805,7 +1805,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: backend-deployment
-  namespace: DevSecJobs
+  namespace: devsecjobs
   labels:
     app: backend
 spec:
@@ -1865,7 +1865,7 @@ apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: backend-pdb
-  namespace: DevSecJobs
+  namespace: devsecjobs
 spec:
   minAvailable: 1
   selector:
@@ -1878,7 +1878,7 @@ kind: Service
 apiVersion: v1
 metadata:
   name: backend-service
-  namespace: DevSecJobs
+  namespace: devsecjobs
 spec:
   selector:
     app: backend

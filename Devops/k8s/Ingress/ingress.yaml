@@ -1,8 +1,8 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: DevSecJobs-ingress
-  namespace: DevSecJobs
+  name: devsecjobs-ingress
+  namespace: devsecjobs
 spec:
   rules:
   - host: devsecjobs.local
