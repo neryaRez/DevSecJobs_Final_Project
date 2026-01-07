@@ -2,12 +2,12 @@ kind: Service
 apiVersion: v1
 metadata:
   name: frontend-service
-  namespace: DevSecJobs
+  namespace: devsecjobs
 spec:
   selector:
     app: frontend
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 5713
+      targetPort: 80
   type: ClusterIP

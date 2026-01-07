@@ -2,7 +2,7 @@ kind: Deployment
 apiVersion: apps/v1
 metadata:
   name: frontend-deployment
-  namespace: DevSecJobs
+  namespace: devsecjobs
   labels:
     app: frontend
 spec:
@@ -19,20 +19,20 @@ spec:
         - name: frontend
           image: nery28/my-app-frontend:latest
           ports:
-            - containerPort: 5173
+            - containerPort: 80
           envFrom:
             - configMapRef:
                 name: frontend-config
           livenessProbe:
             httpGet:
               path: /
-              port: 5173
+              port: 80
             initialDelaySeconds: 10
             periodSeconds: 20
           readinessProbe:
             httpGet:
               path: /
-              port: 5173
+              port: 80
             initialDelaySeconds: 5
             periodSeconds: 10
           resources:

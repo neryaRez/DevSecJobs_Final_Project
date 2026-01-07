@@ -2,7 +2,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: mysql-pvc
-  namespace: DevSecJobs
+  namespace: devsecjobs
 spec:
   accessModes:
     - ReadWriteOnce
