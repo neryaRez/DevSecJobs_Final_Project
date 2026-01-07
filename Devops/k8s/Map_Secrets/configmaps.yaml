@@ -1,0 +1,22 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: backend-config
+  namespace: DecSecJobs
+data:
+  FLASK_ENV: "production"
+  FLASK_DEBUG: "0"
+  PORT: "5001"
+  JWT_ACCESS_EXPIRES_MIN: "60"
+  JWT_REFRESH_EXPIRES_DAYS: "7"
+  CORS_ORIGINS: "*"
+
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: frontend-config
+  namespace: DecSecJobs
+data:
+  VITE_API_BASE_URL: "http://backend:5001/api"
+

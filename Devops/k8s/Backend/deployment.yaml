@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+  namespace: DecSecJobs
+  labels:
+    app: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: nery28/my-app-backend:latest
+
+          ports:
+            - containerPort: 5001
+
+          envFrom:
+            - configMapRef:
+                name: backend-config
+            - secretRef:
+                name: db-credentials
+            - secretRef:
+                name: jwt-secret
+
+          env:
+            - name: DATABASE_URL
+              value: "mysql+pymysql://$(DB_USER):$(DB_PASSWORD)@$(DB_HOST):3306/$(DB_NAME)?charset=utf8mb4"
+
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5001
+            initialDelaySeconds: 10
+            periodSeconds: 20
+
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5001
+            initialDelaySeconds: 5
+            periodSeconds: 10
+
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
