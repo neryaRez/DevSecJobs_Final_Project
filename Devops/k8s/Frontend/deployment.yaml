@@ -17,7 +17,8 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: nery28/my-app-frontend:latest
+          image: nery28/my-app-frontend:v1
+          imagePullPolicy: Always
           ports:
             - containerPort: 80
           envFrom:
