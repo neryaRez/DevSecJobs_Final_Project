@@ -1,12 +1,17 @@
 
 --- START: FrontEnd/Dockerfile ---
-FROM node:20-alpine
+FROM node:20-alpine AS build
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
+RUN npm run build
 EXPOSE 5173
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "5173"]
+
+FROM nginx:alpine
+COPY --from=build /app/dist /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
 # End of Dockerfile
 --- END: FrontEnd/Dockerfile ---
 
@@ -237,7 +242,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App.jsx";
-import "./output.css";
+import "./index.css";
 import { AuthProvider } from "./context/AuthContext.jsx";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
@@ -1525,6 +1530,13 @@ export default function ProtectedRoute({ children, adminOnly = false }) {
 }
 --- END: FrontEnd/src/components/ProtectedRoute.jsx ---
 
+--- START: Devops/k8s/namespace.yaml ---
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: devsecjobs
+--- END: Devops/k8s/namespace.yaml ---
+
 --- START: Devops/k8s/MySQL/deployment.yaml ---
 kind: Deployment
 apiVersion: apps/v1
@@ -1553,22 +1565,22 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: db-credentials
-                key: DB_PASSWORD
+                key: MYSQL_ROOT_PASSWORD
           - name: MYSQL_DATABASE
             valueFrom:
               secretKeyRef:
                 name: db-credentials
-                key: DB_NAME
+                key: MYSQL_DATABASE
           - name: MYSQL_USER
             valueFrom:
               secretKeyRef:
                 name: db-credentials
-                key: DB_USER
+                key: MYSQL_USER
           - name: MYSQL_PASSWORD
             valueFrom:
               secretKeyRef:
                 name: db-credentials
-                key: DB_PASSWORD
+                key: MYSQL_PASSWORD
           
         volumeMounts:
             - name: mysql-pvc
@@ -1647,10 +1659,8 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: DevSecJobs-ingress
+  name: devsecjobs-ingress
   namespace: devsecjobs
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   rules:
   - host: devsecjobs.local
@@ -1707,12 +1717,16 @@ metadata:
   name: db-credentials
   namespace: devsecjobs
 type: Opaque
-data:
-  DB_USER: cm9vdA==              # root
-  DB_PASSWORD: cGFzc3dvcmQ=      # password
-  DB_HOST: bXlzcWwtc2VydmljZQ==  # mysql-service
-  DB_NAME: ZGV2c2Vjb3BzMjBiaXU=  # devsecops20biu
+stringData:
+  MYSQL_ROOT_PASSWORD: "rootStrongPass123"
+  MYSQL_DATABASE: "devsecjobs"
+  MYSQL_USER: "devsecjobs_user"
+  MYSQL_PASSWORD: "devsecjobs_pass"
 
+  DB_HOST: "mysql-service"
+  DB_NAME: "devsecjobs"
+  DB_USER: "devsecjobs_user"
+  DB_PASSWORD: "devsecjobs_pass"
 ---
 kind: Secret
 apiVersion: v1
@@ -1744,22 +1758,23 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: nery28/my-app-frontend:latest
+          image: nery28/my-app-frontend:v1
+          imagePullPolicy: Always
           ports:
-            - containerPort: 5173
+            - containerPort: 80
           envFrom:
             - configMapRef:
                 name: frontend-config
           livenessProbe:
             httpGet:
               path: /
-              port: 5173
+              port: 80
             initialDelaySeconds: 10
             periodSeconds: 20
           readinessProbe:
             httpGet:
               path: /
-              port: 5173
+              port: 80
             initialDelaySeconds: 5
             periodSeconds: 10
           resources:
@@ -1796,7 +1811,7 @@ spec:
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 5713
+      targetPort: 80
   type: ClusterIP
 --- END: Devops/k8s/Frontend/service.yaml ---
 
@@ -1820,7 +1835,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: nery28/my-app-backend:latest
+          image: nery28/my-app-backend:1
 
           ports:
             - containerPort: 5001
@@ -1858,6 +1873,10 @@ spec:
             limits:
               memory: "512Mi"
               cpu: "500m"
+    initContainers:
+      - name: wait-for-mysql
+        image: busybox
+        command: ['sh', '-c', 'until nc -z -v -w30 mysql-service 3306; do echo "Waiting for MySQL..."; sleep 5; done;']          
 --- END: Devops/k8s/Backend/deployment.yaml ---
 
 --- START: Devops/k8s/Backend/pdb.yaml ---
@@ -2114,7 +2133,7 @@ from extensions import db
 from Models.applicant import Applicant
 
 applicants_bp = Blueprint("applicants", __name__)
-@applicants_bp.get("")
+@applicants_bp.get("/")
 def applicants_list_jobs():
     rows = Applicant.query.order_by(Applicant.id.desc()).all()
     return jsonify([
