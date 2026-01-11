@@ -88,9 +88,5 @@ output.css
 *.json.backup
 *.json.old
 *.json~
-*.json
-package-lock.json
-yarn.lock
-package.json
 *.backup
 
