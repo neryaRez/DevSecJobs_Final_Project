@@ -9,3 +9,5 @@ flask-migrate
 flask-bcrypt
 sqlalchemy
 python-dotenv
+Werkzeug
+cryptography

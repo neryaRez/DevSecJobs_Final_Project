@@ -1,0 +1,45 @@
+version: "3.9"
+
+services:
+  mysql:
+    image: mysql:8
+    container_name: devsecjobs-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: devsecjobs
+      MYSQL_USER: devsec
+      MYSQL_PASSWORD: devsecpass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-prootpass"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./Backend
+    container_name: devsecjobs-backend
+    env_file:
+      - ./Backend/.env
+    ports:
+      - "5001:5001"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./FrontEnd
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:5001}
+    container_name: devsecjobs-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+volumes:
+  mysql-data:
