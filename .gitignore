@@ -82,3 +82,11 @@ lerna-debug.log*
 Thumbs.db
 output.css
 
+# =========================
+# json files
+# =========================
+*.json.backup
+*.json.old
+*.json~
+*.backup
+
