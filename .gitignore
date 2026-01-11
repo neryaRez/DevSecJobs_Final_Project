@@ -88,5 +88,6 @@ output.css
 *.json.backup
 *.json.old
 *.json~
+*.json
 *.backup
 
