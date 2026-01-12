@@ -37,7 +37,7 @@ spec:
 
       containers:
         - name: backend
-          image: nery28/my-app-backend:1
+          image: nery28/my-app-backend:v2
           ports:
             - containerPort: 5001
 

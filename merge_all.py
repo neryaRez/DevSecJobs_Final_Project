@@ -51,6 +51,8 @@ INCLUDE_EXTS = {
     ".yml", ".yaml",
     ".mdx",
     ".sh",
+    ".tf",
+    ".dockerfile"
 }
 
 def is_readme(p: Path) -> bool:

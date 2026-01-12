@@ -1925,6 +1925,60 @@ spec:
   type: ClusterIP
 --- END: Devops/k8s/Backend/service.yaml ---
 
+--- START: Devops/tf/eks/addons.tf ---
+
+--- END: Devops/tf/eks/addons.tf ---
+
+--- START: Devops/tf/eks/eks.tf ---
+
+--- END: Devops/tf/eks/eks.tf ---
+
+--- START: Devops/tf/eks/outputs.tf ---
+
+--- END: Devops/tf/eks/outputs.tf ---
+
+--- START: Devops/tf/eks/providers.tf ---
+terraform {
+    required_providers {
+        aws = {
+            source = "hashicorp/aws"
+            version = "~> 5.0"
+        }
+    }
+}
+
+provider "aws" {
+    region = var.aws_region
+}
+--- END: Devops/tf/eks/providers.tf ---
+
+--- START: Devops/tf/eks/variables.tf ---
+variable "aws_region" {
+    description = "The AWS region to deploy resources in"
+    type        = string
+    default     = "us-east-1"
+}
+variable "cluster_name" {
+    description = "The name of the EKS cluster"
+    type        = string
+    default     = "devsecjobs-eks"
+}
+variable "k8s_version" {
+    description = "The Kubernetes version for the EKS cluster"
+    type        = string
+    default     = "1.29"
+}
+variable "node_instance_type" {
+    description = "The instance type for the EKS worker nodes"
+    type        = string
+    default     = "t3.medium"
+}
+--- END: Devops/tf/eks/variables.tf ---
+
+--- START: Devops/tf/eks/vpc.tf ---
+
+--- END: Devops/tf/eks/vpc.tf ---
+
 --- START: Backend/Dockerfile ---
 FROM python:3.12-alpine
 WORKDIR /app

@@ -15,9 +15,11 @@ spec:
       labels:
         app: mysql
     spec:
+      strategy:
+        type: Recreate
       containers:
       - name: mysql
-        image: mysql:5.7
+        image: mysql:8.0
         ports:
         - containerPort: 3306
         env:
@@ -41,6 +43,8 @@ spec:
               secretKeyRef:
                 name: db-credentials
                 key: MYSQL_PASSWORD
+          - name: MYSQLD_ARGS
+            value: "--innodb_force_recovery=4"      
           
         volumeMounts:
             - name: mysql-pvc
