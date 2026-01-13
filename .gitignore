@@ -105,3 +105,12 @@ output.css
 *.json.old
 *.json~
 *.backup
+
+
+# =========================
+# terraform
+# =========================
+.terraform/
+*.tfstate
+*.tfstate.*.terraform/
+.terraform/
