@@ -3,19 +3,12 @@
 #########################################################
 
 # Data sources for existing subnets (public/private)
-data "aws_subnet_ids" "private" {
-  vpc_id = "vpc-0eb9413a11d42317f"
-  tags = {
-    "kubernetes.io/role/internal-elb" = "1"
-  }
+locals {
+  public_subnet_ids  = [for s in aws_subnet.public : s.id]
+  private_subnet_ids = [for s in aws_subnet.private : s.id]
+  all_subnet_ids     = concat(local.public_subnet_ids, local.private_subnet_ids)
 }
 
-data "aws_subnet_ids" "public" {
-  vpc_id = "vpc-0eb9413a11d42317f"
-  tags = {
-    "kubernetes.io/role/elb" = "1"
-  }
-}
 
 # IAM Role for EKS Cluster
 resource "aws_iam_role" "eks_cluster_role" {
@@ -25,9 +18,9 @@ resource "aws_iam_role" "eks_cluster_role" {
     Version = "2012-10-17",
     Statement = [
       {
-        Effect = "Allow",
+        Effect    = "Allow",
         Principal = { Service = "eks.amazonaws.com" },
-        Action = "sts:AssumeRole"
+        Action    = "sts:AssumeRole"
       }
     ]
   })
@@ -46,9 +39,9 @@ resource "aws_iam_role" "eks_node_role" {
     Version = "2012-10-17",
     Statement = [
       {
-        Effect = "Allow",
+        Effect    = "Allow",
         Principal = { Service = "ec2.amazonaws.com" },
-        Action = "sts:AssumeRole"
+        Action    = "sts:AssumeRole"
       }
     ]
   })
@@ -76,10 +69,12 @@ resource "aws_eks_cluster" "eks_cluster" {
   version  = var.k8s_version
 
   vpc_config {
-    subnet_ids              = concat(data.aws_subnet_ids.public.ids, data.aws_subnet_ids.private.ids)
+    subnet_ids              = local.all_subnet_ids
     endpoint_private_access = true
     endpoint_public_access  = true
   }
+
+
 
   depends_on = [
     aws_iam_role_policy_attachment.eks_cluster_attach
@@ -91,7 +86,7 @@ resource "aws_eks_node_group" "eks_nodes" {
   cluster_name    = aws_eks_cluster.eks_cluster.name
   node_group_name = "${var.cluster_name}-nodes"
   node_role_arn   = aws_iam_role.eks_node_role.arn
-  subnet_ids      = data.aws_subnet_ids.private.ids
+  subnet_ids      = local.private_subnet_ids
 
   scaling_config {
     desired_size = 2
@@ -102,7 +97,7 @@ resource "aws_eks_node_group" "eks_nodes" {
   instance_types = [var.node_instance_type]
 
   remote_access {
-    ec2_ssh_key = "Yuval-pair"
+    ec2_ssh_key = "Nery-Pair"
   }
 
   depends_on = [
