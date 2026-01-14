@@ -108,9 +108,26 @@ output.css
 
 
 # =========================
-# terraform
+# Terraform
 # =========================
+
+# Terraform working directory (providers, modules cache)
 .terraform/
+**/.terraform/
+
+# Terraform state files (לא לשמור בגיט!)
 *.tfstate
-*.tfstate.*.terraform/
-.terraform/
+*.tfstate.*
+
+# Terraform plan files
+*.tfplan
+
+# Terraform CLI config (מקומי בלבד)
+.terraformrc
+terraform.rc
+
+# Override files (debug / local only)
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
