@@ -1549,6 +1549,10 @@ metadata:
     app: mysql
 spec:
   replicas: 1
+
+  strategy:
+    type: Recreate
+
   selector:
     matchLabels:
       app: mysql
@@ -1557,68 +1561,58 @@ spec:
       labels:
         app: mysql
     spec:
-
-      strategy:
-        type: Recreate
       containers:
-      - name: mysql
-        image: mysql:8.0
-
-        ports:
-        - containerPort: 3306
-        env:
-          - name: MYSQL_ROOT_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: db-credentials
-                key: MYSQL_ROOT_PASSWORD
-          - name: MYSQL_DATABASE
-            valueFrom:
-              secretKeyRef:
-                name: db-credentials
-                key: MYSQL_DATABASE
-          - name: MYSQL_USER
-            valueFrom:
-              secretKeyRef:
-                name: db-credentials
-                key: MYSQL_USER
-          - name: MYSQL_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: db-credentials
-                key: MYSQL_PASSWORD
-
-          - name: MYSQLD_ARGS
-            value: "--innodb_force_recovery=4"      
-
-          
-        volumeMounts:
+        - name: mysql
+          image: 455715798206.dkr.ecr.us-east-1.amazonaws.com/devsecjobs-mysql:8.0
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: MYSQL_ROOT_PASSWORD
+            - name: MYSQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: MYSQL_DATABASE
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: MYSQL_USER
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: MYSQL_PASSWORD
+            - name: MYSQLD_ARGS
+              value: "--innodb_force_recovery=4"
+          volumeMounts:
             - name: mysql-pvc
               mountPath: /var/lib/mysql
-
-        livenessProbe:
-          exec:
-            command: ["sh", "-c", "mysqladmin ping -h 127.0.0.1 -p$MYSQL_ROOT_PASSWORD"]
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          exec:
-            command: ["sh", "-c", "mysqladmin ping -h 127.0.0.1 -p$MYSQL_ROOT_PASSWORD"]
-          initialDelaySeconds: 15
-          periodSeconds: 5
-        resources:
+          livenessProbe:
+            exec:
+              command: ["sh", "-c", "mysqladmin ping -h 127.0.0.1 -p$MYSQL_ROOT_PASSWORD"]
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command: ["sh", "-c", "mysqladmin ping -h 127.0.0.1 -p$MYSQL_ROOT_PASSWORD"]
+            initialDelaySeconds: 15
+            periodSeconds: 5
+          resources:
             requests:
               memory: "512Mi"
               cpu: "500m"
             limits:
               memory: "1Gi"
               cpu: "1"
-
       volumes:
         - name: mysql-pvc
           persistentVolumeClaim:
             claimName: mysql-pvc
-      
 --- END: Devops/k8s/MySQL/deployment.yaml ---
 
 --- START: Devops/k8s/MySQL/pdb.yaml ---
@@ -1643,10 +1637,11 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
+  storageClassName: gp2  
   resources:
     requests:
       storage: 20Gi
-  storageClassName: standard
+  
 --- END: Devops/k8s/MySQL/pvc.yaml ---
 
 --- START: Devops/k8s/MySQL/service.yaml ---
@@ -1768,7 +1763,8 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: nery28/my-app-frontend:v4
+          image: 455715798206.dkr.ecr.us-east-1.amazonaws.com/devsecjobs-frontend:v4
+
 
           imagePullPolicy: Always
           ports:
@@ -1866,7 +1862,7 @@ spec:
 
       containers:
         - name: backend
-          image: nery28/my-app-backend:v2
+          image: 455715798206.dkr.ecr.us-east-1.amazonaws.com/devsecjobs-backend:v2
           ports:
             - containerPort: 5001
 
@@ -1957,8 +1953,104 @@ resource "aws_eks_addon" "kube_proxy" {
   resolve_conflicts_on_create = "OVERWRITE"
   resolve_conflicts_on_update = "OVERWRITE"
 }
+resource "aws_eks_addon" "ebs_csi" {
+  cluster_name                = aws_eks_cluster.eks_cluster.name
+  addon_name                  = "aws-ebs-csi-driver"
+
+  resolve_conflicts_on_create = "OVERWRITE"
+  resolve_conflicts_on_update = "OVERWRITE"
+  
+  lifecycle {
+    ignore_changes = [
+      resolve_conflicts_on_create,
+      resolve_conflicts_on_update,
+    ]
+  }
+}
 
 --- END: Devops/tf/eks/addons.tf ---
+
+--- START: Devops/tf/eks/alb_irsa.tf ---
+module "alb_controller_irsa" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+  version = "~> 5.0"
+
+  role_name = "alb-controller-irsa"
+
+  attach_load_balancer_controller_policy = true
+
+  oidc_providers = {
+    eks = {
+      provider_arn = aws_iam_openid_connect_provider.eks.arn
+      namespace_service_accounts = [
+        "kube-system:aws-load-balancer-controller"
+      ]
+    }
+  }
+}
+--- END: Devops/tf/eks/alb_irsa.tf ---
+
+--- START: Devops/tf/eks/alb_sa.tf ---
+resource "kubernetes_service_account" "alb_controller" {
+  metadata {
+    name      = "aws-load-balancer-controller"
+    namespace = "kube-system"
+
+    annotations = {
+      "eks.amazonaws.com/role-arn" = module.alb_controller_irsa.iam_role_arn
+    }
+  }
+}
+--- END: Devops/tf/eks/alb_sa.tf ---
+
+--- START: Devops/tf/eks/ecr.tf ---
+locals {
+  repos = [
+    "${var.project_name}-frontend",
+    "${var.project_name}-backend",
+    "${var.project_name}-mysql"
+  ]
+}
+
+resource "aws_ecr_repository" "repos" {
+  for_each = toset(local.repos)
+
+  name                 = each.value
+  image_tag_mutability = "IMMUTABLE" # מומלץ! כל push חייב תג חדש (v1,v2 וכו')
+  force_delete         = true        # נוח בסביבת לימוד (אפשר לשנות ל-false בפרודקשן)
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+}
+
+# מוחק אימג'ים ישנים כדי לא לנפח עלויות/לכלוך
+resource "aws_ecr_lifecycle_policy" "repos" {
+  for_each   = aws_ecr_repository.repos
+  repository = each.value.name
+
+  policy = jsonencode({
+    rules = [
+      {
+        rulePriority = 1
+        description  = "Keep last 15 images"
+        selection = {
+          tagStatus   = "any"
+          countType   = "imageCountMoreThan"
+          countNumber = 15
+        }
+        action = {
+          type = "expire"
+        }
+      }
+    ]
+  })
+}
+
+output "ecr_repo_urls" {
+  value = { for k, r in aws_ecr_repository.repos : k => r.repository_url }
+}
+--- END: Devops/tf/eks/ecr.tf ---
 
 --- START: Devops/tf/eks/eks.tf ---
 #########################################################
@@ -2024,6 +2116,10 @@ resource "aws_iam_role_policy_attachment" "eks_registry_attach" {
   role       = aws_iam_role.eks_node_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
 }
+resource "aws_iam_role_policy_attachment" "eks_ebs_csi_attach" {
+  role       = aws_iam_role.eks_node_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+}
 
 # EKS Cluster
 resource "aws_eks_cluster" "eks_cluster" {
@@ -2060,16 +2156,33 @@ resource "aws_eks_node_group" "eks_nodes" {
   instance_types = [var.node_instance_type]
 
   remote_access {
-    ec2_ssh_key = "Nery-Pair"
+    ec2_ssh_key = var.ssh_key_name
   }
 
   depends_on = [
     aws_iam_role_policy_attachment.eks_worker_attach,
     aws_iam_role_policy_attachment.eks_cni_attach,
-    aws_iam_role_policy_attachment.eks_registry_attach
+    aws_iam_role_policy_attachment.eks_registry_attach,
+    aws_iam_role_policy_attachment.eks_ebs_csi_attach
   ]
 }
 --- END: Devops/tf/eks/eks.tf ---
+
+--- START: Devops/tf/eks/k8s_providers.tf ---
+
+--- END: Devops/tf/eks/k8s_providers.tf ---
+
+--- START: Devops/tf/eks/oidc.tf ---
+data "tls_certificate" "eks_oidc" {
+  url = aws_eks_cluster.eks_cluster.identity[0].oidc[0].issuer
+}
+
+resource "aws_iam_openid_connect_provider" "eks" {
+  url             = aws_eks_cluster.eks_cluster.identity[0].oidc[0].issuer
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = [data.tls_certificate.eks_oidc.certificates[0].sha1_fingerprint]
+}
+--- END: Devops/tf/eks/oidc.tf ---
 
 --- START: Devops/tf/eks/outputs.tf ---
 output "eks_cluster_name" {
@@ -2105,6 +2218,18 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
+    tls = {
+      source  = "hashicorp/tls"
+      version = "~> 4.0"
+    }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.30"
+    }
+    helm = {
+      source  = "hashicorp/helm"
+      version = "~> 2.14"
+    }
   }
 }
 
@@ -2133,6 +2258,16 @@ variable "node_instance_type" {
   description = "The instance type for the EKS worker nodes"
   type        = string
   default     = "t3.medium"
+}
+variable "project_name" {
+  description = "The name of the project"
+  type        = string
+  default     = "devsecjobs"
+}
+variable "ssh_key_name" {
+  description = "The name of the SSH key pair for EC2 instances"
+  type        = string
+  default     = "Nery-Pair"
 }
 --- END: Devops/tf/eks/variables.tf ---
 
