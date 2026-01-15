@@ -23,7 +23,15 @@ resource "aws_eks_addon" "kube_proxy" {
 resource "aws_eks_addon" "ebs_csi" {
   cluster_name                = aws_eks_cluster.eks_cluster.name
   addon_name                  = "aws-ebs-csi-driver"
+
   resolve_conflicts_on_create = "OVERWRITE"
   resolve_conflicts_on_update = "OVERWRITE"
+  
+  lifecycle {
+    ignore_changes = [
+      resolve_conflicts_on_create,
+      resolve_conflicts_on_update,
+    ]
+  }
 }
 
