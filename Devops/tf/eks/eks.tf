@@ -61,6 +61,10 @@ resource "aws_iam_role_policy_attachment" "eks_registry_attach" {
   role       = aws_iam_role.eks_node_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
 }
+resource "aws_iam_role_policy_attachment" "eks_ebs_csi_attach" {
+  role       = aws_iam_role.eks_node_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+}
 
 # EKS Cluster
 resource "aws_eks_cluster" "eks_cluster" {
@@ -97,12 +101,13 @@ resource "aws_eks_node_group" "eks_nodes" {
   instance_types = [var.node_instance_type]
 
   remote_access {
-    ec2_ssh_key = "Nery-Pair"
+    ec2_ssh_key = var.ssh_key_name
   }
 
   depends_on = [
     aws_iam_role_policy_attachment.eks_worker_attach,
     aws_iam_role_policy_attachment.eks_cni_attach,
-    aws_iam_role_policy_attachment.eks_registry_attach
+    aws_iam_role_policy_attachment.eks_registry_attach,
+    aws_iam_role_policy_attachment.eks_ebs_csi_attach
   ]
 }

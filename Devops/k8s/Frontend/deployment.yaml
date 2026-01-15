@@ -17,7 +17,8 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: nery28/my-app-frontend:v4
+          image: 455715798206.dkr.ecr.us-east-1.amazonaws.com/devsecjobs-frontend:v4
+
 
           imagePullPolicy: Always
           ports:

@@ -37,7 +37,7 @@ SKIP_EXTS = {
     ".mp4", ".mov", ".avi", ".mkv",
     ".woff", ".woff2", ".ttf", ".eot",
     ".mp3", ".wav",
-    ".exe", ".dll", ".so", ".dylib",
+    ".exe", ".dll", ".so", ".dylib",".tflstate",".tfstate.backup",
 }
 
 # סיומות שמכניסים (כולל CSS!)

@@ -18,3 +18,13 @@ variable "node_instance_type" {
   type        = string
   default     = "t3.medium"
 }
+variable "project_name" {
+  description = "The name of the project"
+  type        = string
+  default     = "devsecjobs"
+}
+variable "ssh_key_name" {
+  description = "The name of the SSH key pair for EC2 instances"
+  type        = string
+  default     = "Nery-Pair"
+}

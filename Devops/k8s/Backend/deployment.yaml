@@ -37,7 +37,7 @@ spec:
 
       containers:
         - name: backend
-          image: nery28/my-app-backend:v2
+          image: 455715798206.dkr.ecr.us-east-1.amazonaws.com/devsecjobs-backend:v2
           ports:
             - containerPort: 5001
 

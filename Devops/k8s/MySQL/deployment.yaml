@@ -7,6 +7,10 @@ metadata:
     app: mysql
 spec:
   replicas: 1
+
+  strategy:
+    type: Recreate
+
   selector:
     matchLabels:
       app: mysql
@@ -15,65 +19,55 @@ spec:
       labels:
         app: mysql
     spec:
-
-      strategy:
-        type: Recreate
       containers:
-      - name: mysql
-        image: mysql:8.0
-
-        ports:
-        - containerPort: 3306
-        env:
-          - name: MYSQL_ROOT_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: db-credentials
-                key: MYSQL_ROOT_PASSWORD
-          - name: MYSQL_DATABASE
-            valueFrom:
-              secretKeyRef:
-                name: db-credentials
-                key: MYSQL_DATABASE
-          - name: MYSQL_USER
-            valueFrom:
-              secretKeyRef:
-                name: db-credentials
-                key: MYSQL_USER
-          - name: MYSQL_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: db-credentials
-                key: MYSQL_PASSWORD
-
-          - name: MYSQLD_ARGS
-            value: "--innodb_force_recovery=4"      
-
-          
-        volumeMounts:
+        - name: mysql
+          image: 455715798206.dkr.ecr.us-east-1.amazonaws.com/devsecjobs-mysql:8.0
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: MYSQL_ROOT_PASSWORD
+            - name: MYSQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: MYSQL_DATABASE
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: MYSQL_USER
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: MYSQL_PASSWORD
+            - name: MYSQLD_ARGS
+              value: "--innodb_force_recovery=4"
+          volumeMounts:
             - name: mysql-pvc
               mountPath: /var/lib/mysql
-
-        livenessProbe:
-          exec:
-            command: ["sh", "-c", "mysqladmin ping -h 127.0.0.1 -p$MYSQL_ROOT_PASSWORD"]
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          exec:
-            command: ["sh", "-c", "mysqladmin ping -h 127.0.0.1 -p$MYSQL_ROOT_PASSWORD"]
-          initialDelaySeconds: 15
-          periodSeconds: 5
-        resources:
+          livenessProbe:
+            exec:
+              command: ["sh", "-c", "mysqladmin ping -h 127.0.0.1 -p$MYSQL_ROOT_PASSWORD"]
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command: ["sh", "-c", "mysqladmin ping -h 127.0.0.1 -p$MYSQL_ROOT_PASSWORD"]
+            initialDelaySeconds: 15
+            periodSeconds: 5
+          resources:
             requests:
               memory: "512Mi"
               cpu: "500m"
             limits:
               memory: "1Gi"
               cpu: "1"
-
       volumes:
         - name: mysql-pvc
           persistentVolumeClaim:
             claimName: mysql-pvc
-      
