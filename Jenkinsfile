@@ -95,7 +95,7 @@ pipeline {
         ]) {
           script {
             sh '''
-              set -euo pipefail
+              set -eu
               echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USER" --password-stdin
               docker build -t "$DOCKERHUB_FRONTEND_IMAGE:$GIT_SHA" "$FRONTEND_DIR"
               docker push "$DOCKERHUB_FRONTEND_IMAGE:$GIT_SHA"
@@ -121,7 +121,7 @@ pipeline {
         ]) {
           script {
             sh '''
-              set -euo pipefail
+              set -eu
               echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USER" --password-stdin
               docker build -t "$DOCKERHUB_BACKEND_IMAGE:$GIT_SHA" "$BACKEND_DIR"
               docker push "$DOCKERHUB_BACKEND_IMAGE:$GIT_SHA"
@@ -146,7 +146,7 @@ pipeline {
           sshUserPrivateKey(credentialsId: "${HELM_GIT_SSH_KEY_ID}", keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')
         ]) {
           sh '''
-            set -euo pipefail
+            set -eu
             rm -rf helm-repo
             GIT_SSH_COMMAND="ssh -i $SSH_KEY -o StrictHostKeyChecking=no" \
               git clone --branch "$HELM_REPO_BRANCH" "$HELM_REPO_URL" helm-repo
@@ -212,7 +212,7 @@ pipeline {
                 sshUserPrivateKey(credentialsId: "${HELM_GIT_SSH_KEY_ID}", keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')
               ]) {
                 sh '''
-                  set -euo pipefail
+                  set -eu
                   GIT_SSH_COMMAND="ssh -i $SSH_KEY -o StrictHostKeyChecking=no" \
                     git push origin HEAD:"$HELM_REPO_BRANCH"
                 '''
