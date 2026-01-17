@@ -10,6 +10,7 @@ EXPOSE 5173
 
 FROM nginx:alpine
 COPY --from=build /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
 # End of Dockerfile
@@ -1666,10 +1667,14 @@ kind: Ingress
 metadata:
   name: devsecjobs-ingress
   namespace: devsecjobs
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}]'
 spec:
   rules:
-  - host: devsecjobs.local
-    http:
+  - http:
       paths:
       - path: /
         pathType: Prefix
@@ -1678,10 +1683,7 @@ spec:
             name: frontend-service
             port:
               number: 80
-  - host: api.devsecjobs.local
-    http:
-      paths:            
-      - path: /
+      - path: /health
         pathType: Prefix
         backend:
           service:
@@ -1763,7 +1765,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: 455715798206.dkr.ecr.us-east-1.amazonaws.com/devsecjobs-frontend:v4
+          image: 455715798206.dkr.ecr.us-east-1.amazonaws.com/devsecjobs-frontend:v6
 
 
           imagePullPolicy: Always
@@ -1970,6 +1972,45 @@ resource "aws_eks_addon" "ebs_csi" {
 
 --- END: Devops/tf/eks/addons.tf ---
 
+--- START: Devops/tf/eks/alb_helm.tf ---
+resource "helm_release" "aws_load_balancer_controller" {
+  name       = "aws-load-balancer-controller"
+  repository = "https://aws.github.io/eks-charts"
+  chart      = "aws-load-balancer-controller"
+  namespace  = "kube-system"
+
+  # אתה כבר יוצר SA עם IRSA (alb_sa.tf), אז לא לתת ל-Helm ליצור אחד חדש
+  set {
+    name  = "serviceAccount.create"
+    value = "false"
+  }
+  set {
+    name  = "serviceAccount.name"
+    value = "aws-load-balancer-controller"
+  }
+
+  set {
+    name  = "clusterName"
+    value = aws_eks_cluster.eks_cluster.name
+  }
+
+  # מומלץ כדי למנוע autodiscovery מוזר
+  set {
+    name  = "region"
+    value = var.aws_region
+  }
+  set {
+    name  = "vpcId"
+    value = aws_vpc.eks_vpc.id
+  }
+
+  depends_on = [
+    module.alb_controller_irsa,
+    kubernetes_service_account.alb_controller
+  ]
+}
+--- END: Devops/tf/eks/alb_helm.tf ---
+
 --- START: Devops/tf/eks/alb_irsa.tf ---
 module "alb_controller_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
@@ -2169,7 +2210,27 @@ resource "aws_eks_node_group" "eks_nodes" {
 --- END: Devops/tf/eks/eks.tf ---
 
 --- START: Devops/tf/eks/k8s_providers.tf ---
+data "aws_eks_cluster" "this" {
+  name = aws_eks_cluster.eks_cluster.name
+}
 
+data "aws_eks_cluster_auth" "this" {
+  name = aws_eks_cluster.eks_cluster.name
+}
+
+provider "kubernetes" {
+  host                   = data.aws_eks_cluster.this.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.this.certificate_authority[0].data)
+  token                  = data.aws_eks_cluster_auth.this.token
+}
+
+provider "helm" {
+  kubernetes {
+    host                   = data.aws_eks_cluster.this.endpoint
+    cluster_ca_certificate = base64decode(data.aws_eks_cluster.this.certificate_authority[0].data)
+    token                  = data.aws_eks_cluster_auth.this.token
+  }
+}
 --- END: Devops/tf/eks/k8s_providers.tf ---
 
 --- START: Devops/tf/eks/oidc.tf ---

@@ -104,16 +104,18 @@ export default function Jobs() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-500 via-gray-600 to-blue-400 p-6">
-      <div className="max-w-5xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-assistant-semibold text-gray-800">המשרות שלי</h1>
+    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-sky-600 to-green-400 py-6 pr-6 pl-0">
+      <div className="w-full text-right pr-4" dir="rtl">
+        <div className="w-full flex items-center justify-end gap-4 mb-6">
           <button
             onClick={() => setCreating(true)}
-            className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-pink-500 text-white hover:scale-105 hover:shadow-md transition"
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-pink-500 text-white hover:scale-105 hover:shadow-md transition"
           >
-            + משרה חדשה
+           <span className="text-lg leading-none">+</span>
+            <span>משרה חדשה</span>
           </button>
+        <h1 className="text-3xl font-assistant-semibold text-black">המשרות שלי</h1>
+
         </div>
 
         {creating && (

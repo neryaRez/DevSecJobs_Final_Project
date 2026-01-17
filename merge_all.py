@@ -9,7 +9,7 @@ SKIP_DIRS = {
     ".git", ".idea", ".vscode",
     "dist", "build", ".build", "dist-ssr",
     "__pycache__", ".pytest_cache", ".mypy_cache", "htmlcov",
-    ".next", ".nuxt", ".vite", "coverage",
+    ".next", ".nuxt", ".vite", "coverage",".terraform",
 }
 
 # קבצים ספציפיים לדילוג
@@ -26,7 +26,10 @@ SKIP_BY_NAME = {
     ".dockerignore",
     ".gitignore",
     "LICENSE", "LICENSE.txt", "LICENSE.md",
-    ".env"         
+    ".env" ,"terraform.tfstate","terraform.tfstate.backup",
+    "terraform.tfvars","terraform.tfvars.example",
+    "terraform.tfstate.*", "*.log","*.lock","*.bak",
+    ".terraform.lock.hcl",        
 }
 
 # סיומות בינאריות / לא רלוונטיות

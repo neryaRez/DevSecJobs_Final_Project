@@ -12,13 +12,38 @@ spec:
   rules:
   - http:
       paths:
-      - path: /
+      - path: /auth
         pathType: Prefix
         backend:
           service:
-            name: frontend-service
+            name: backend-service
             port:
-              number: 80
+              number: 5001
+
+      - path: /jobs
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-service
+            port:
+              number: 5001
+
+      - path: /apply
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-service
+            port:
+              number: 5001
+
+      - path: /applicants
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-service
+            port:
+              number: 5001
+
       - path: /health
         pathType: Prefix
         backend:
@@ -26,3 +51,12 @@ spec:
             name: backend-service
             port:
               number: 5001
+
+      # Frontend last
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend-service
+            port:
+              number: 80

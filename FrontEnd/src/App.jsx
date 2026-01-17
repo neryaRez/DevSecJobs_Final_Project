@@ -11,6 +11,7 @@ import MyApplications from "./pages/MyApplications.jsx";
 import JobsFeed from "./pages/JobsFeed.jsx";
 import CompleteProfile from "./pages/CompleteProfile.jsx";
 import DashboardApplications from "./pages/DashboardApplications.jsx";
+import DashboardApplicants from "./pages/DashboardApplicants.jsx";
 export default function App() {
   return (
     <>
@@ -50,6 +51,7 @@ export default function App() {
         <Route path="/jobs-feed" element={<JobsFeed />} />
         <Route path="/complete-profile" element={<ProtectedRoute><CompleteProfile /></ProtectedRoute>} />
         <Route path="/dashboard/applications" element={<ProtectedRoute adminOnly><DashboardApplications /></ProtectedRoute>} />
+        <Route path="/dashboard/applicants" element={<ProtectedRoute adminOnly><DashboardApplicants /></ProtectedRoute>} />
       </Routes>
     </>
   );
@@ -57,7 +59,7 @@ export default function App() {
 
 function LandingPage() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-r from-blue-500 to-purple-600 via-indigo-500 text-center p-4">
+    <div className="min-h-screen flex flex-col bg-gradient-to-r from-blue-500 to-purple-600 via-indigo-500 p-4">
       <h1 className="text-5xl font-extrabold text-white drop-shadow-lg">
         Welcome to DevSecJobs!
       </h1>

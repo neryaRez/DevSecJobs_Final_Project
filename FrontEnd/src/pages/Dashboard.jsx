@@ -1,5 +1,8 @@
 // 📁 src/pages/Dashboard.jsx
+
+import {useNavigate} from "react-router-dom";
 export default function Dashboard() {
+  const navigate = useNavigate();
   const cards = [
     {
       title: "המשרות שלי",
@@ -22,7 +25,7 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-500 via-gray-600 to-blue-400 p-10 flex flex-col items-center">
+    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-sky-600 to-green-400 p-10 flex flex-col items-center">
       {/* כותרת גדולה ובולטת */}
       <h1 className="text-5xl font-assistant text-white  drop-shadow-xl mb-12">
         <br />
@@ -37,21 +40,13 @@ export default function Dashboard() {
           <div
             key={card.title}
             className={`bg-gradient-to-r ${card.color} text-white rounded-2xl shadow-xl p-8 hover:scale-105 hover:shadow-2xl transition cursor-pointer`}
-            onClick={() => (window.location.href = card.link)}
+            onClick={() => navigate(card.link)}
           >
             <h2 className="text-2xl font-bold mb-3">{card.title}</h2>
             <p className="text-white/90">{card.description}</p>
           </div>
         ))}
       </div>
-
-      {/* כפתור צף ליצירת משרה */}
-      <button
-        onClick={() => alert("פתיחת טופס יצירת משרה חדשה")}
-        className="fixed bottom-8 right-8 w-16 h-16 rounded-full bg-gradient-to-r from-purple-600 to-pink-500 text-white text-4xl flex items-center justify-center shadow-2xl hover:scale-110 hover:shadow-pink-400/80 transition"
-      >
-        +
-      </button>
     </div>
   );
 }
