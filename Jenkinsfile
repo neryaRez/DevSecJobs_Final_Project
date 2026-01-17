@@ -12,8 +12,8 @@ pipeline {
     DOCKERHUB_BACKEND_IMAGE  = 'yourdockerhub/backend'
     DOCKERHUB_CREDENTIALS_ID = 'dockerhub-user'
 
-    HELM_REPO_URL            = 'git@github.com:your-org/helm-charts.git'
-    HELM_REPO_BRANCH         = 'main'
+    HELM_REPO_URL            = 'git@github.com:neryaRez/DevSecJobs_Final_Project.git'
+    HELM_REPO_BRANCH         = 'develop'
     HELM_GIT_SSH_KEY_ID       = 'helm-git-ssh-key'
 
     FRONTEND_DIR             = 'FrontEnd'
@@ -33,11 +33,17 @@ pipeline {
     stage('Resolve Environment') {
       steps {
         script {
-          def branch = env.BRANCH_NAME
+          def branch = env.CHANGE_BRANCH ?: env.BRANCH_NAME ?: env.GIT_BRANCH
           if (!branch) {
             branch = sh(script: "git rev-parse --abbrev-ref HEAD", returnStdout: true).trim()
           }
-          branch = branch.replaceFirst(/^origin\//, '')
+          if (branch == 'HEAD') {
+            branch = sh(script: "git name-rev --name-only HEAD", returnStdout: true).trim()
+          }
+          branch = branch
+            .replaceFirst(/^refs\/heads\//, '')
+            .replaceFirst(/^remotes\/origin\//, '')
+            .replaceFirst(/^origin\//, '')
 
           if (branch == 'develop') {
             env.DEPLOY_ENV = 'dev'
