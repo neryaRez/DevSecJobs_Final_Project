@@ -16,6 +16,62 @@ CMD ["nginx", "-g", "daemon off;"]
 # End of Dockerfile
 --- END: FrontEnd/Dockerfile ---
 
+--- START: FrontEnd/deploy_frontend.sh ---
+#!/usr/bin/env bash
+set -euo pipefail
+
+# ==== CONFIG ====
+AWS_REGION="us-east-1"
+NAMESPACE="devsecjobs"
+DEPLOYMENT="frontend-deployment"
+CONTAINER_NAME="frontend"
+REPO_NAME="devsecjobs-frontend"
+ACCOUNT_ID="455715798206"
+ECR_URI="${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${REPO_NAME}"
+
+# ==== INPUT TAG ====
+TAG="${1:-}"
+if [[ -z "${TAG}" ]]; then
+  TAG="v$(date +%y%m%d-%H%M%S)"
+fi
+
+echo "==> Deploying FRONTEND tag: ${TAG}"
+echo "==> ECR: ${ECR_URI}:${TAG}"
+
+# # ==== LOGIN ECR ====
+# echo "==> Logging in to ECR..."
+# aws ecr get-login-password --region "${AWS_REGION}" \
+# | docker login --username AWS --password-stdin "${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com" >/dev/null
+
+# ==== BUILD + PUSH ====
+echo "==> Building & pushing image..."
+# pushd FrontEnd >/dev/null
+docker buildx build \
+  --platform linux/amd64,linux/arm64 \
+  -t "${ECR_URI}:${TAG}" \
+  --push \
+  .
+# popd >/dev/null
+
+# ==== UPDATE DEPLOYMENT IMAGE ====
+echo "==> Updating Kubernetes deployment image..."
+kubectl set image "deployment/${DEPLOYMENT}" \
+  "${CONTAINER_NAME}=${ECR_URI}:${TAG}" \
+  -n "${NAMESPACE}"
+
+# ==== ROLLOUT STATUS ====
+echo "==> Waiting for rollout..."
+kubectl rollout status "deployment/${DEPLOYMENT}" -n "${NAMESPACE}"
+
+# ==== VERIFY ====
+echo "==> Verify deployment image:"
+kubectl get deploy "${DEPLOYMENT}" -n "${NAMESPACE}" \
+  -o=jsonpath='{.spec.template.spec.containers[0].image}{"\n"}'
+
+echo "✅ Done."
+
+--- END: FrontEnd/deploy_frontend.sh ---
+
 --- START: FrontEnd/eslint.config.js ---
 import js from '@eslint/js'
 import globals from 'globals'
@@ -115,10 +171,10 @@ export default defineConfig({
 
 --- START: FrontEnd/src/App.css ---
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  text-align: initial;
 }
 
 .logo {
@@ -172,6 +228,8 @@ import MyApplications from "./pages/MyApplications.jsx";
 import JobsFeed from "./pages/JobsFeed.jsx";
 import CompleteProfile from "./pages/CompleteProfile.jsx";
 import DashboardApplications from "./pages/DashboardApplications.jsx";
+import DashboardApplicants from "./pages/DashboardApplicants.jsx";
+import handsImg from "./assets/hands.jpg";
 export default function App() {
   return (
     <>
@@ -211,6 +269,7 @@ export default function App() {
         <Route path="/jobs-feed" element={<JobsFeed />} />
         <Route path="/complete-profile" element={<ProtectedRoute><CompleteProfile /></ProtectedRoute>} />
         <Route path="/dashboard/applications" element={<ProtectedRoute adminOnly><DashboardApplications /></ProtectedRoute>} />
+        <Route path="/dashboard/applicants" element={<ProtectedRoute adminOnly><DashboardApplicants /></ProtectedRoute>} />
       </Routes>
     </>
   );
@@ -218,16 +277,22 @@ export default function App() {
 
 function LandingPage() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-r from-blue-500 to-purple-600 via-indigo-500 text-center p-4">
-      <h1 className="text-5xl font-extrabold text-white drop-shadow-lg">
+    <div className="min-h-screen flex flex-col items-center justify-start pt-24 bg-gradient-to-b from-amber-100  to-brown-600 p-4">
+      <h1 className="text-5xl font-extrabold text-amber-900 drop-shadow-lg">
         Welcome to DevSecJobs!
       </h1>
-      <h2 className="text-2xl font-semibold text-white drop-shadow-md mt-6">
-        הדרך שלך להצליח !
+      <h2 className="text-2xl font-semibold text-amber-800 drop-shadow-md mt-6">
+        ! הדרך שלך להצליח
       </h2>
-      <p className="text-2xl text-white drop-shadow-sm mt-4">
-        מחוייבים אליך לאורך כל הדרך ואוהבים אותך ❤️
+      <p className="text-2xl text-amber-700 drop-shadow-sm mt-4">
+       ! מחוייבים אליך לאורך כל הדרך ומאמינים בך 
       </p>
+     <img
+        src={handsImg}
+        alt="Holding hands"
+        className="mt-10 w-80 rounded-xl shadow-lg"
+      />
+
     </div>
   );
 }
@@ -321,7 +386,7 @@ export function useAuth() {
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: "",
   headers: { "Content-Type": "application/json" },
 });
 
@@ -510,7 +575,10 @@ export default function CompleteProfile() {
 
 --- START: FrontEnd/src/pages/Dashboard.jsx ---
 // 📁 src/pages/Dashboard.jsx
+
+import {useNavigate} from "react-router-dom";
 export default function Dashboard() {
+  const navigate = useNavigate();
   const cards = [
     {
       title: "המשרות שלי",
@@ -533,7 +601,7 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-500 via-gray-600 to-blue-400 p-10 flex flex-col items-center">
+    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-sky-600 to-green-400 p-10 flex flex-col items-center">
       {/* כותרת גדולה ובולטת */}
       <h1 className="text-5xl font-assistant text-white  drop-shadow-xl mb-12">
         <br />
@@ -548,25 +616,24 @@ export default function Dashboard() {
           <div
             key={card.title}
             className={`bg-gradient-to-r ${card.color} text-white rounded-2xl shadow-xl p-8 hover:scale-105 hover:shadow-2xl transition cursor-pointer`}
-            onClick={() => (window.location.href = card.link)}
+            onClick={() => navigate(card.link)}
           >
             <h2 className="text-2xl font-bold mb-3">{card.title}</h2>
             <p className="text-white/90">{card.description}</p>
           </div>
         ))}
       </div>
-
-      {/* כפתור צף ליצירת משרה */}
-      <button
-        onClick={() => alert("פתיחת טופס יצירת משרה חדשה")}
-        className="fixed bottom-8 right-8 w-16 h-16 rounded-full bg-gradient-to-r from-purple-600 to-pink-500 text-white text-4xl flex items-center justify-center shadow-2xl hover:scale-110 hover:shadow-pink-400/80 transition"
-      >
-        +
-      </button>
     </div>
   );
 }
 --- END: FrontEnd/src/pages/Dashboard.jsx ---
+
+--- START: FrontEnd/src/pages/DashboardApplicants.jsx ---
+// FrontEnd/src/pages/DashboardApplicants.jsx
+export default function DashboardApplicants() {
+  return <div style={{padding: 20}}>בקרוב: מאגר מועמדים</div>;
+}
+--- END: FrontEnd/src/pages/DashboardApplicants.jsx ---
 
 --- START: FrontEnd/src/pages/DashboardApplications.jsx ---
 import { useEffect, useState } from "react";
@@ -1227,16 +1294,19 @@ export default function Jobs() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-500 via-gray-600 to-blue-400 p-6">
-      <div className="max-w-5xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-assistant-semibold text-gray-800">המשרות שלי</h1>
+    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-sky-600 to-green-400 py-6 pr-6 pl-0">
+      <div className="w-full text-right pr-4" dir="rtl">
+        <div className="w-full flex items-center justify-end gap-4 mb-6">
           <button
             onClick={() => setCreating(true)}
-            className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-pink-500 text-white hover:scale-105 hover:shadow-md transition"
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-pink-500 text-white hover:scale-105 hover:shadow-md transition"
           >
-            + משרה חדשה
+           <span className="text-lg leading-none">+</span>
+            <span>משרה חדשה</span>
           </button>
+        <h1 dir ="rtl"
+        className="w-full text-3xl font-assistant-semibold text-black text-right">המשרות שלי</h1>
+
         </div>
 
         {creating && (
@@ -1676,13 +1746,38 @@ spec:
   rules:
   - http:
       paths:
-      - path: /
+      - path: /auth
         pathType: Prefix
         backend:
           service:
-            name: frontend-service
+            name: backend-service
             port:
-              number: 80
+              number: 5001
+
+      - path: /jobs
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-service
+            port:
+              number: 5001
+
+      - path: /apply
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-service
+            port:
+              number: 5001
+
+      - path: /applicants
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-service
+            port:
+              number: 5001
+
       - path: /health
         pathType: Prefix
         backend:
@@ -1690,6 +1785,15 @@ spec:
             name: backend-service
             port:
               number: 5001
+
+      # Frontend last
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend-service
+            port:
+              number: 80
 --- END: Devops/k8s/Ingress/ingress.yaml ---
 
 --- START: Devops/k8s/Map_Secrets/configmaps.yaml ---
@@ -1765,7 +1869,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: 455715798206.dkr.ecr.us-east-1.amazonaws.com/devsecjobs-frontend:v6
+          image: 455715798206.dkr.ecr.us-east-1.amazonaws.com/devsecjobs-frontend:v26
 
 
           imagePullPolicy: Always

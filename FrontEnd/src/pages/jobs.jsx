@@ -114,7 +114,8 @@ export default function Jobs() {
            <span className="text-lg leading-none">+</span>
             <span>משרה חדשה</span>
           </button>
-        <h1 className="text-3xl font-assistant-semibold text-black">המשרות שלי</h1>
+        <h1 dir ="rtl"
+        className="w-full text-3xl font-assistant-semibold text-black text-right">המשרות שלי</h1>
 
         </div>
 
