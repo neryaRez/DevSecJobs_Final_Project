@@ -8,8 +8,8 @@ pipeline {
   }
 
   environment {
-    DOCKERHUB_FRONTEND_IMAGE = 'yourdockerhub/frontend'
-    DOCKERHUB_BACKEND_IMAGE  = 'yourdockerhub/backend'
+    DOCKERHUB_FRONTEND_IMAGE = 'shayr/devsecjobs-frontend'
+    DOCKERHUB_BACKEND_IMAGE  = 'shayr/devsecjobs-backend'
     DOCKERHUB_CREDENTIALS_ID = 'dockerhub-user'
 
     HELM_REPO_URL            = 'git@github.com:neryaRez/DevSecJobs_Final_Project.git'
