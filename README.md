@@ -1,4 +1,4 @@
-# DevSecJobs 🚀  
+# DevSecJobs  
 **A Full DevOps-Oriented Fullstack Application on AWS EKS**
 
 ---
