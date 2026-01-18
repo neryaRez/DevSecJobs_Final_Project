@@ -111,3 +111,14 @@ resource "aws_eks_node_group" "eks_nodes" {
     aws_iam_role_policy_attachment.eks_ebs_csi_attach
   ]
 }
+
+resource "aws_security_group_rule" "jenkins_to_eks" {
+  type                     = "ingress"
+  security_group_id = aws_eks_cluster.eks_cluster.vpc_config[0].cluster_security_group_id
+  from_port                = 443
+  to_port                  = 443
+  protocol                 = "tcp"
+  source_security_group_id = data.terraform_remote_state.jenkins.outputs.jenkins_sg_id
+  description              = "Allow Jenkins to communicate with EKS cluster"
+  
+}

@@ -52,4 +52,9 @@ resource "aws_instance" "jenkins" {
   user_data                   = local.user_data
 
   tags = { Name = "jenkins-trusted-ec2" }
+  lifecycle {
+    prevent_destroy = true
+  }
+  
+  
 }
