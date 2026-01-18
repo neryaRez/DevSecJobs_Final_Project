@@ -22,3 +22,15 @@ output "eks_node_role_arn" {
   value       = aws_iam_role.eks_node_role.arn
   description = "The IAM Role ARN of the Node Group"
 }
+output "vpc_id" {
+  value       = aws_vpc.eks_vpc.id
+  description = "The ID of the VPC where EKS cluster is deployed"
+}
+output "public_subnet_ids" {
+  value       = aws_subnet.public[*].id
+  description = "The IDs of the subnets used by the EKS cluster"
+}
+output "private_subnet_ids" {
+  value       = aws_subnet.private[*].id
+  description = "The IDs of the private subnets used by the EKS cluster"
+}
