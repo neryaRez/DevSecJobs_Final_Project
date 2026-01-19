@@ -106,7 +106,7 @@ function Home() {
               Build Your DevSecOps Career
             </h1>
             <p className="mt-6 text-lg text-amber-700">
-              Connecting DevOps & Security professionals with companies that value excellence.
+              Connecting DevOps & Security professionals with companies that value excellence
             </p>
 
           </div>

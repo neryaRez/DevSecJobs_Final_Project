@@ -19,11 +19,6 @@ pipeline {
     BE_DEPLOYMENT = 'backend-deployment'
     BE_CONTAINER  = 'backend'
 
-    // חובה למלא (או להוציא מהסטייג' ולהגדיר kubeconfig ידנית פעם אחת בשרת)
-    // EKS_CLUSTER = 'YOUR_CLUSTER_NAME'
-
-    // חובה למלא: כתובת ה-ALB/Ingress שלך (דוגמה: k8s-devsecjobs-xxxx.us-east-1.elb.amazonaws.com)
-    // HEALTH_URL = 'http://<ALB_DNS_NAME>/health'
     KUBECONFIG = '/var/lib/jenkins/.kube/config'
 
   }
@@ -77,15 +72,12 @@ pipeline {
           aws --version
           docker --version
 
-          # buildx חייב להיות קיים
           docker buildx version
 
-          # curl לאימות HTTP
           curl --version
 
           kubectl version --client=true
 
-          # אם לא הגדרת kubeconfig ידנית על השרת, תפתח את זה:
           # aws eks update-kubeconfig --region "${AWS_REGION}" --name "${EKS_CLUSTER}"
 
           kubectl get ns | head
@@ -108,7 +100,6 @@ pipeline {
       steps {
         sh '''
           set -e
-          # יוצרים builder אם אין, ומוודאים שהוא בשימוש
           if ! docker buildx inspect devsecjobs-builder >/dev/null 2>&1; then
             docker buildx create --name devsecjobs-builder --use
           else
@@ -211,7 +202,6 @@ pipeline {
           set -e
           echo "Verifying HTTP health endpoint: ${HEALTH_URL}"
 
-          # מנסים עד 12 פעמים (סה"כ ~60 שניות) כי לפעמים ה-ALB עוד מתעדכן
           for i in $(seq 1 12); do
             code=$(curl -s -o /dev/null -w "%{http_code}" "${HEALTH_URL}" || true)
             echo "Attempt $i -> HTTP ${code}"
