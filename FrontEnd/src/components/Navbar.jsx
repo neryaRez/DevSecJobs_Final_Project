@@ -30,7 +30,7 @@ export default function Navbar() {
               `text-sm font-semibold transition ${
                 isActive
                   ? "text-stone-400"
-                  : "text-slate-700 hover:text-stone-400"
+                  : "text-stone-500 hover:text-stone-400"
               }`
             }
           >
