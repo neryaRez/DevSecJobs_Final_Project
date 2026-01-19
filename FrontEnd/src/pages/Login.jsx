@@ -1,8 +1,7 @@
 // 📁 src/pages/Login.jsx
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext.jsx";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import api from "../api/client.js";
 
 export default function Login() {
@@ -18,21 +17,12 @@ export default function Login() {
     setLoading(true);
 
     try {
-      // שליחת בקשה ל-API שלך
-      const res = await api.post("/auth/login", {
-        email,
-        password,
-      });
+      const res = await api.post("/auth/login", { email, password });
 
-      // שמירת טוקן + פרטי משתמש
       login(res.data.user, res.data.access_token);
 
-      // הפניה למסך המתאים
-      if (res.data.user.is_admin) {
-        navigate("/dashboard");
-      } else {
-        navigate("/user-home");
-      }
+      if (res.data.user.is_admin) navigate("/dashboard");
+      else navigate("/user-home");
     } catch (error) {
       console.error(error);
       alert("שגיאה בהתחברות - בדוק את פרטי המשתמש שלך");
@@ -52,48 +42,62 @@ export default function Login() {
           התחברות 🔑
         </h1>
 
-        {/* אימייל */}
-        <label className="block text-sm font-semibold text-slate-700 mb-2">
-          אימייל
-        </label>
-        <input
-          type="email"
-          placeholder="you@example.com"
-          className="w-full border border-slate-200 rounded-xl px-4 py-3 mb-5
-                     focus:outline-none focus:ring-2 focus:ring-amber-300"
-        />
+        <form onSubmit={handleSubmit}>
+          {/* אימייל */}
+          <label className="block text-sm font-semibold text-slate-700 mb-2">
+            אימייל
+          </label>
+          <input
+            type="email"
+            dir="ltr"
+            inputMode="email"
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@example.com"
+            className="w-full border border-slate-200 rounded-xl px-4 py-3 mb-5
+                       text-left
+                       focus:outline-none focus:ring-2 focus:ring-amber-300"
+          />
 
-        {/* סיסמה */}
-        <label className="block text-sm font-semibold text-slate-700 mb-2">
-          סיסמה
-        </label>
-        <input
-          type="password"
-          placeholder="••••••••"
-          className="w-full border border-slate-200 rounded-xl px-4 py-3 mb-6
-                     focus:outline-none focus:ring-2 focus:ring-amber-300"
-        />
+          {/* סיסמה */}
+          <label className="block text-sm font-semibold text-slate-700 mb-2">
+            סיסמה
+          </label>
+          <input
+            type="password"
+            dir="ltr"
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            className="w-full border border-slate-200 rounded-xl px-4 py-3 mb-6
+                       text-left
+                       focus:outline-none focus:ring-2 focus:ring-amber-300"
+          />
 
-        {/* כפתור */}
-        <button
-          type="submit"
-          className="w-full rounded-xl py-3 font-semibold text-white
-                     bg-amber-600 hover:bg-amber-700 transition shadow-sm"
-        >
-          התחבר
-        </button>
+          {/* כפתור */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full rounded-xl py-3 font-semibold text-white
+                       bg-amber-600 hover:bg-amber-700 transition shadow-sm
+                       disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {loading ? "מתחבר..." : "התחבר"}
+          </button>
+        </form>
 
         {/* טקסט תחתון */}
-        <p
-          dir="rtl"
-          className="text-center text-slate-600 mt-6"
-        >
+        <p dir="rtl" className="text-center text-slate-600 mt-6">
           אין לך חשבון?{" "}
-          <span className="text-amber-700 font-semibold cursor-pointer hover:underline">
+          <Link
+            to="/register"
+            className="text-amber-700 font-semibold hover:underline"
+          >
             צור אחד כאן
-          </span>
+          </Link>
         </p>
-
       </div>
     </div>
   );
