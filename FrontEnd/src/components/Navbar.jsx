@@ -17,7 +17,7 @@ export default function Navbar() {
         {/* Logo */}
         <Link
           to="/"
-        className="sticky top-0 z-50 bg-stone-800/95 backdrop-blur shadow-md"
+          className="text-2xl font-bold text-amber-400 tracking-tight"
         >
           DevSecJobs
         </Link>
