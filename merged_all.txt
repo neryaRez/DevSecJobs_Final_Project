@@ -216,7 +216,7 @@ export default defineConfig({
 
 --- START: FrontEnd/src/App.jsx ---
 // 📁 src/App.jsx
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, BrowserRouter } from "react-router-dom";
 import Navbar from "./components/Navbar.jsx";
 import UserHome from "./pages/UserHome.jsx";
 import Login from "./pages/Login.jsx";
@@ -229,10 +229,21 @@ import JobsFeed from "./pages/JobsFeed.jsx";
 import CompleteProfile from "./pages/CompleteProfile.jsx";
 import DashboardApplications from "./pages/DashboardApplications.jsx";
 import DashboardApplicants from "./pages/DashboardApplicants.jsx";
+
+
+import ManagerLayout from "./layouts/ManagerLayout";
+import Dashboard from "./pages/Dashboard";
+import ManagerJobs from "./pages/ManagerJobs";
+import ManagerApplicants from "./pages/ManagerApplicants";
+import ManagerApplications from "./pages/ManagerApplications";
+
 import handsImg from "./assets/hands.jpg";
+
+
 export default function App() {
   return (
     <>
+      <BrowserRouter>
       <Navbar />
       <Routes>
         {/* ✅ מסך הבית הציבורי – חדש */}
@@ -302,7 +313,10 @@ export default function App() {
         />
 
         <Route path="*" element={<Navigate to="/" replace />} />
+      
+      
       </Routes>
+      </BrowserRouter>
     </>
   );
 }
@@ -323,7 +337,7 @@ function Home() {
               Build Your DevSecOps Career
             </h1>
             <p className="mt-6 text-lg text-amber-700">
-              Connecting DevOps & Security professionals with companies that value excellence.
+              Connecting DevOps & Security professionals with companies that value excellence!!
             </p>
 
           </div>
@@ -393,6 +407,49 @@ ReactDOM.createRoot(document.getElementById("root")).render(
 );
 
 --- END: FrontEnd/src/main.jsx ---
+
+--- START: FrontEnd/src/layouts/ManagerLayout.jsx ---
+import { Outlet, useNavigate } from "react-router-dom";
+
+export default function ManagerLayout() {
+  const navigate = useNavigate();
+
+  return (
+    <div
+      dir="rtl"
+      className="min-h-screen bg-gradient-to-br from-purple-600 via-sky-600 to-green-400"
+    >
+      <div className="p-10">
+        {/* Top bar כללי למנהל */}
+        <div className="max-w-6xl mx-auto flex items-center justify-between mb-10">
+          <button
+            onClick={() => navigate(-1)}
+            className="bg-white/15 backdrop-blur-md border border-white/20 text-white px-4 py-2 rounded-xl shadow-lg hover:bg-white/20 transition"
+          >
+            ← חזרה
+          </button>
+
+          <div className="text-center">
+            <div className="text-3xl md:text-4xl font-assistant text-white drop-shadow-xl">
+              Manager Area
+            </div>
+            <div className="text-white/80 mt-1">
+              ניהול משרות · מועמדים · מועמדויות
+            </div>
+          </div>
+
+          <div className="w-[90px]" />
+        </div>
+
+        {/* תוכן העמודים של המנהל יושב כאן */}
+        <div className="max-w-6xl mx-auto bg-white/15 backdrop-blur-md border border-white/20 rounded-2xl shadow-2xl p-8">
+          <Outlet />
+        </div>
+      </div>
+    </div>
+  );
+}
+--- END: FrontEnd/src/layouts/ManagerLayout.jsx ---
 
 --- START: FrontEnd/src/context/AuthContext.jsx ---
 // 📁 src/context/AuthContext.jsx
@@ -2160,6 +2217,11 @@ resource "aws_instance" "jenkins" {
   user_data                   = local.user_data
 
   tags = { Name = "jenkins-trusted-ec2" }
+  lifecycle {
+    prevent_destroy = true
+  }
+  
+  
 }
 --- END: Devops/tf/jenkins/ec2.tf ---
 
@@ -2295,7 +2357,7 @@ resource "aws_security_group" "jenkins_sg" {
 variable "key_name" {
   description = "The name of the SSH key pair"
   type        = string
-  default     = "Nery-Pair"
+  default     = "jenkins-key"
 }
 variable "instance_type" {
   description = "The type of instance to use for Jenkins"
@@ -2748,10 +2810,6 @@ variable "ssh_key_name" {
   description = "The name of the SSH key pair for EC2 instances"
   type        = string
   default     = "Nery-Pair"
-}
-variable "jenkins_sg_id" {
-  description = "The security group ID of the Jenkins server"
-  type        = string
 }
 --- END: Devops/tf/eks/variables.tf ---
 
