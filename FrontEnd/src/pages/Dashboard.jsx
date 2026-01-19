@@ -15,19 +15,26 @@ export default function Dashboard() {
         Dashboard Manager 📊
       </h1>
 
-      <div className="grid md:grid-cols-3 gap-8 w-full">
+      <div className="grid md:grid-cols-3 gap-8">
         {cards.map((card) => (
           <button
             key={card.title}
-            type="button"
             onClick={() => navigate(card.link)}
-            className={`text-right bg-gradient-to-r ${card.color} text-white rounded-2xl shadow-xl p-8 hover:scale-105 hover:shadow-2xl transition cursor-pointer`}
+            className="text-right bg-white border border-slate-200
+                      rounded-2xl shadow-sm p-8
+                      hover:shadow-md hover:border-amber-300
+                      transition"
           >
-            <h2 className="text-2xl font-bold mb-3">{card.title}</h2>
-            <p className="text-white/90">{card.description}</p>
+            <h2 className="text-xl font-bold text-amber-700 mb-3">
+              {card.title}
+            </h2>
+            <p className="text-slate-600">
+              {card.description}
+            </p>
           </button>
         ))}
       </div>
+
     </div>
   );
 }

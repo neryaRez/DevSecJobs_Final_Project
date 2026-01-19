@@ -6,34 +6,39 @@ export default function ManagerLayout() {
   return (
     <div
       dir="rtl"
-      className="min-h-screen bg-gradient-to-br from-purple-600 via-sky-600 to-green-400"
+        className="min-h-screen bg-slate-50 text-slate-800"
     >
       <div className="p-10">
         {/* Top bar כללי למנהל */}
-        <div className="max-w-6xl mx-auto flex items-center justify-between mb-10">
-          <button
-            onClick={() => navigate(-1)}
-            className="bg-white/15 backdrop-blur-md border border-white/20 text-white px-4 py-2 rounded-xl shadow-lg hover:bg-white/20 transition"
-          >
+        <div className="max-w-6xl mx-auto flex items-center justify-between mb-10
+                bg-white rounded-2xl shadow px-6 py-4">
+            <button
+                onClick={() => navigate(-1)}
+                className="text-amber-700 border border-amber-300 px-4 py-2 rounded-xl
+                hover:bg-amber-50 transition"
+            >
             ← חזרה
-          </button>
+            </button>
 
-          <div className="text-center">
-            <div className="text-3xl md:text-4xl font-assistant text-white drop-shadow-xl">
-              Manager Area
+
+        <div className="text-center">
+            <div className="text-2xl md:text-3xl font-bold text-amber-700">
+                Manager Area
             </div>
-            <div className="text-white/80 mt-1">
-              ניהול משרות · מועמדים · מועמדויות
+            <div className="text-slate-600 mt-1">
+                ניהול משרות · מועמדים · מועמדויות
             </div>
-          </div>
+        </div>
+
 
           <div className="w-[90px]" />
         </div>
 
         {/* תוכן העמודים של המנהל יושב כאן */}
-        <div className="max-w-6xl mx-auto bg-white/15 backdrop-blur-md border border-white/20 rounded-2xl shadow-2xl p-8">
-          <Outlet />
+        <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow p-8">
+                 <Outlet />
         </div>
+
       </div>
     </div>
   );

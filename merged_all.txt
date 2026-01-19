@@ -215,41 +215,36 @@ export default defineConfig({
 --- END: FrontEnd/src/App.css ---
 
 --- START: FrontEnd/src/App.jsx ---
-// 📁 src/App.jsx
-import { Routes, Route, Navigate, BrowserRouter } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar.jsx";
+
 import UserHome from "./pages/UserHome.jsx";
 import Login from "./pages/Login.jsx";
-import ProtectedRoute from "./components/ProtectedRoute.jsx";
-import Dashboard from "./pages/Dashboard.jsx";
 import Register from "./pages/Register.jsx";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
+
+import Dashboard from "./pages/Dashboard.jsx";
 import Jobs from "./pages/jobs.jsx";
-import MyApplications from "./pages/MyApplications.jsx";
-import JobsFeed from "./pages/JobsFeed.jsx";
-import CompleteProfile from "./pages/CompleteProfile.jsx";
 import DashboardApplications from "./pages/DashboardApplications.jsx";
 import DashboardApplicants from "./pages/DashboardApplicants.jsx";
 
+import MyApplications from "./pages/MyApplications.jsx";
+import JobsFeed from "./pages/JobsFeed.jsx";
+import CompleteProfile from "./pages/CompleteProfile.jsx";
 
-import ManagerLayout from "./layouts/ManagerLayout";
-import Dashboard from "./pages/Dashboard";
-import ManagerJobs from "./pages/ManagerJobs";
-import ManagerApplicants from "./pages/ManagerApplicants";
-import ManagerApplications from "./pages/ManagerApplications";
+import ManagerLayout from "./layouts/ManagerLayout.jsx";
 
 import handsImg from "./assets/hands.jpg";
-
 
 export default function App() {
   return (
     <>
-      <BrowserRouter>
       <Navbar />
-      <Routes>
-        {/* ✅ מסך הבית הציבורי – חדש */}
-        <Route path="/" element={<Home />} />
 
+      <Routes>
+        <Route path="/" element={<Home handsImg={handsImg} />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
         <Route
           path="/user-home"
@@ -260,24 +255,21 @@ export default function App() {
           }
         />
 
+        {/* ✅ אזור מנהל - Layout אחד לכל תתי המסכים */}
         <Route
           path="/dashboard"
           element={
             <ProtectedRoute adminOnly>
-              <Dashboard />
+              <ManagerLayout />
             </ProtectedRoute>
           }
-        />
+        >
+          <Route index element={<Dashboard />} />
+          <Route path="jobs" element={<Jobs />} />
+          <Route path="applications" element={<DashboardApplications />} />
+          <Route path="applicants" element={<DashboardApplicants />} />
+        </Route>
 
-        <Route path="/register" element={<Register />} />
-        <Route
-          path="/dashboard/jobs"
-          element={
-            <ProtectedRoute adminOnly>
-              <Jobs />
-            </ProtectedRoute>
-          }
-        />
         <Route
           path="/my-applications"
           element={
@@ -286,7 +278,9 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+
         <Route path="/jobs-feed" element={<JobsFeed />} />
+
         <Route
           path="/complete-profile"
           element={
@@ -295,43 +289,18 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/dashboard/applications"
-          element={
-            <ProtectedRoute adminOnly>
-              <DashboardApplications />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/applicants"
-          element={
-            <ProtectedRoute adminOnly>
-              <DashboardApplicants />
-            </ProtectedRoute>
-          }
-        />
 
         <Route path="*" element={<Navigate to="/" replace />} />
-      
-      
       </Routes>
-      </BrowserRouter>
     </>
   );
 }
 
-/* =========================
-   HOME – העמוד הראשי החדש
-   ========================= */
-function Home() {
+function Home({ handsImg }) {
   return (
     <div className="bg-slate-50 text-slate-800">
-
-      {/* HERO */}
       <section className="bg-gradient-to-b from-amber-100 to-stone-300 text-amber-800 py-24">
         <div className="max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
-
           <div>
             <h1 className="text-5xl font-extrabold leading-tight">
               Build Your DevSecOps Career
@@ -339,28 +308,20 @@ function Home() {
             <p className="mt-6 text-lg text-amber-700">
               Connecting DevOps & Security professionals with companies that value excellence!!
             </p>
-
           </div>
 
           <div className="hidden md:block rounded-xl overflow-hidden shadow-lg">
-            <img
-              src={handsImg}
-              alt="DevSecOps"
-              className="w-full"
-            />
+            <img src={handsImg} alt="DevSecOps" className="w-full" />
           </div>
-
         </div>
       </section>
 
-      {/* FEATURES */}
       <section className="py-20">
         <div className="max-w-6xl mx-auto px-6 grid md:grid-cols-3 gap-8">
-
           {[
             { title: "Secure Hiring", icon: "🔐", text: "Security-first recruitment process." },
             { title: "Cloud & DevOps", icon: "☁️", text: "Focused on modern infrastructure roles." },
-            { title: "Career Growth", icon: "🚀", text: "Opportunities that scale with you." }
+            { title: "Career Growth", icon: "🚀", text: "Opportunities that scale with you." },
           ].map((f, i) => (
             <div
               key={i}
@@ -371,11 +332,8 @@ function Home() {
               <p className="mt-2 text-slate-600">{f.text}</p>
             </div>
           ))}
-
         </div>
       </section>
-
-
     </div>
   );
 }
@@ -700,53 +658,34 @@ export default function CompleteProfile() {
 --- END: FrontEnd/src/pages/CompleteProfile.jsx ---
 
 --- START: FrontEnd/src/pages/Dashboard.jsx ---
-// 📁 src/pages/Dashboard.jsx
+import { useNavigate } from "react-router-dom";
 
-import {useNavigate} from "react-router-dom";
 export default function Dashboard() {
   const navigate = useNavigate();
+
   const cards = [
-    {
-      title: "המשרות שלי",
-      description: "צפה ונהל את כל המשרות שפרסמת במערכת",
-      link: "/dashboard/jobs",
-      color: "from-blue-500 to-purple-600",
-    },
-    {
-      title: "מועמדויות שהוגשו",
-      description: "בדוק מי הגיש מועמדות למשרות שלך ונהל את הסטטוס",
-      link: "/dashboard/applications",
-      color: "from-green-400 to-green-700",
-    },
-    {
-      title: "מאגר מועמדים",
-      description: "גישה לרשימת מועמדים פוטנציאליים במערכת",
-      link: "/dashboard/applicants",
-      color: "from-pink-500 to-purple-500",
-    },
+    { title: "המשרות שלי", description: "צפה ונהל את כל המשרות שפרסמת במערכת", link: "/dashboard/jobs", color: "from-blue-500 to-purple-600" },
+    { title: "מועמדויות שהוגשו", description: "בדוק מי הגיש מועמדות למשרות שלך ונהל את הסטטוס", link: "/dashboard/applications", color: "from-green-400 to-green-700" },
+    { title: "מאגר מועמדים", description: "גישה לרשימת מועמדים פוטנציאליים במערכת", link: "/dashboard/applicants", color: "from-pink-500 to-purple-500" },
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-sky-600 to-green-400 p-10 flex flex-col items-center">
-      {/* כותרת גדולה ובולטת */}
-      <h1 className="text-5xl font-assistant text-white  drop-shadow-xl mb-12">
-        <br />
+    <div dir="rtl">
+      <h1 className="text-5xl font-assistant text-white drop-shadow-xl mb-10 text-right">
         Dashboard Manager 📊
       </h1>
-     
 
-
-      {/* רשת הכרטיסים */}
-      <div className="grid md:grid-cols-3 gap-8 max-w-6xl w-full">
+      <div className="grid md:grid-cols-3 gap-8 w-full">
         {cards.map((card) => (
-          <div
+          <button
             key={card.title}
-            className={`bg-gradient-to-r ${card.color} text-white rounded-2xl shadow-xl p-8 hover:scale-105 hover:shadow-2xl transition cursor-pointer`}
+            type="button"
             onClick={() => navigate(card.link)}
+            className={`text-right bg-gradient-to-r ${card.color} text-white rounded-2xl shadow-xl p-8 hover:scale-105 hover:shadow-2xl transition cursor-pointer`}
           >
             <h2 className="text-2xl font-bold mb-3">{card.title}</h2>
             <p className="text-white/90">{card.description}</p>
-          </div>
+          </button>
         ))}
       </div>
     </div>
