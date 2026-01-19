@@ -8,7 +8,7 @@ export default function Navbar() {
     <nav
   dir="rtl"
   className="sticky top-0 z-50
-             bg-gradient-to-r from-amber-400 to-stone-50 text-stone-100
+             bg-gradient-to-r from-amber-100 to-stone-50 text-stone-100
              shadow-md"
 >
 
@@ -17,7 +17,7 @@ export default function Navbar() {
         {/* Logo */}
         <Link
           to="/"
-          className="text-2xl font-bold text-amber-400 tracking-tight"
+          className="text-2xl font-bold text-stone-400 tracking-tight"
         >
           DevSecJobs
         </Link>
@@ -29,8 +29,8 @@ export default function Navbar() {
             className={({ isActive }) =>
               `text-sm font-semibold transition ${
                 isActive
-                  ? "text-stone-200"
-                  : "text-slate-700 hover:text-amber-400"
+                  ? "text-stone-400"
+                  : "text-slate-700 hover:text-stone-400"
               }`
             }
           >
