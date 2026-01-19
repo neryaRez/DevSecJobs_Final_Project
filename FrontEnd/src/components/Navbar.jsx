@@ -29,8 +29,8 @@ export default function Navbar() {
             className={({ isActive }) =>
               `text-sm font-semibold transition ${
                 isActive
-                  ? "text-stone-400"
-                  : "text-slate-600 hover:text-stone-400"
+                  ? "text-stone-500"
+                  : "text-slate-800 hover:text-stone-400"
               }`
             }
           >
