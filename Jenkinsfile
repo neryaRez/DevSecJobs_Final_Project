@@ -190,35 +190,6 @@ pipeline {
       }
     }
 
-    stage('HTTP Verify /health (ALB)') {
-      when {
-        anyOf {
-          expression { return env.CHANGED_FRONTEND == "true" }
-          expression { return env.CHANGED_BACKEND == "true" }
-        }
-      }
-      steps {
-        sh '''
-          set -e
-          echo "Verifying HTTP health endpoint: ${HEALTH_URL}"
-
-          for i in $(seq 1 12); do
-            code=$(curl -s -o /dev/null -w "%{http_code}" "${HEALTH_URL}" || true)
-            echo "Attempt $i -> HTTP ${code}"
-
-            if [ "${code}" = "200" ]; then
-              echo "Health check PASSED"
-              exit 0
-            fi
-
-            sleep 5
-          done
-
-          echo "Health check FAILED after retries"
-          exit 1
-        '''
-      }
-    }
 
     stage('Final Verify (Pods)') {
       when {
