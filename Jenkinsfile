@@ -96,56 +96,33 @@ pipeline {
       }
     }
 
-    stage('Ensure buildx builder') {
-      steps {
-        sh '''
-          set -e
-          if ! docker buildx inspect devsecjobs-builder >/dev/null 2>&1; then
-            docker buildx create --name devsecjobs-builder --use
-          else
-            docker buildx use devsecjobs-builder
-          fi
-          docker buildx inspect --bootstrap
-        '''
-      }
-    }
 
-    stage('Build & Push Frontend (buildx + latest)') {
+    stage('Build & Push Frontend') {
       when { expression { return env.CHANGED_FRONTEND == "true" } }
       steps {
         sh '''
           set -e
           echo "Building FRONTEND (buildx):"
           echo " - ${FE_ECR}:${IMAGE_TAG}"
-          echo " - ${FE_ECR}:latest"
           cd FrontEnd
 
-          docker buildx build \
-            --platform linux/amd64,linux/arm64 \
-            -t "${FE_ECR}:${IMAGE_TAG}" \
-            -t "${FE_ECR}:latest" \
-            --push \
-            .
+          docker build -t "${FE_ECR}:${IMAGE_TAG}" .
+          docker push "${FE_ECR}:${IMAGE_TAG}"
         '''
       }
     }
 
-    stage('Build & Push Backend (buildx + latest)') {
+    stage('Build & Push Backend') {
       when { expression { return env.CHANGED_BACKEND == "true" } }
       steps {
         sh '''
           set -e
           echo "Building BACKEND (buildx):"
           echo " - ${BE_ECR}:${IMAGE_TAG}"
-          echo " - ${BE_ECR}:latest"
           cd Backend
 
-          docker buildx build \
-            --platform linux/amd64,linux/arm64 \
-            -t "${BE_ECR}:${IMAGE_TAG}" \
-            -t "${BE_ECR}:latest" \
-            --push \
-            .
+          docker build -t "${BE_ECR}:${IMAGE_TAG}" .
+          docker push "${BE_ECR}:${IMAGE_TAG}"
         '''
       }
     }
