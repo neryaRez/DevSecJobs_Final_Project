@@ -42,54 +42,55 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-600 to-pink-500">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white rounded-xl shadow-xl p-8 w-full max-w-md"
-      >
-        <h1 className="text-3xl font-bold text-gray-800 text-center mb-6">
+    <div
+      dir="rtl"
+      className="min-h-screen bg-gradient-to-b from-amber-100 to-stone-300 text-slate-800
+                 flex items-center justify-center px-4"
+    >
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 border border-slate-200">
+        <h1 className="text-3xl font-bold text-center text-amber-700 mb-8">
           התחברות 🔑
         </h1>
 
-        <div className="mb-4">
-          <label className="block text-gray-700 font-medium mb-1">אימייל</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-pink-400 focus:outline-none"
-            placeholder="you@example.com"
-            required
-          />
-        </div>
+        {/* אימייל */}
+        <label className="block text-sm font-semibold text-slate-700 mb-2">
+          אימייל
+        </label>
+        <input
+          type="email"
+          placeholder="you@example.com"
+          className="w-full border border-slate-200 rounded-xl px-4 py-3 mb-5
+                     focus:outline-none focus:ring-2 focus:ring-amber-300"
+        />
 
-        <div className="mb-6">
-          <label className="block text-gray-700 font-medium mb-1">סיסמה</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-pink-400 focus:outline-none"
-            placeholder="••••••••"
-            required
-          />
-        </div>
+        {/* סיסמה */}
+        <label className="block text-sm font-semibold text-slate-700 mb-2">
+          סיסמה
+        </label>
+        <input
+          type="password"
+          placeholder="••••••••"
+          className="w-full border border-slate-200 rounded-xl px-4 py-3 mb-6
+                     focus:outline-none focus:ring-2 focus:ring-amber-300"
+        />
 
+        {/* כפתור */}
         <button
           type="submit"
-          disabled={loading}
-          className="w-full bg-gradient-to-r from-purple-600 to-pink-500 text-white py-2 rounded-lg font-semibold hover:scale-105 hover:shadow-lg transition disabled:opacity-50"
+          className="w-full rounded-xl py-3 font-semibold text-white
+                     bg-amber-600 hover:bg-amber-700 transition shadow-sm"
         >
-          {loading ? "מתחבר..." : "התחבר"}
+          התחבר
         </button>
 
-        <p className="text-center text-gray-600 mt-4">
+        {/* טקסט תחתון */}
+        <p className="text-center text-slate-600 mt-6">
           אין לך חשבון?{" "}
-          <a href="/register" className="text-pink-600 hover:underline">
+          <span className="text-amber-700 font-semibold cursor-pointer hover:underline">
             צור אחד כאן
-          </a>
+          </span>
         </p>
-      </form>
+      </div>
     </div>
   );
 }

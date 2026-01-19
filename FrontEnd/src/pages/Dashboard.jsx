@@ -11,7 +11,7 @@ export default function Dashboard() {
 
   return (
     <div dir="rtl">
-      <h1 className="text-5xl font-assistant text-white drop-shadow-xl mb-10 text-right">
+      <h1 className="text-5xl font-assistant text-stone-900 drop-shadow-xl mb-10 text-right">
         Dashboard Manager 📊
       </h1>
 
