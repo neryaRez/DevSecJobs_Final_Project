@@ -84,12 +84,16 @@ export default function Login() {
         </button>
 
         {/* טקסט תחתון */}
-        <p className="text-center text-slate-600 mt-6">
+        <p
+          dir="rtl"
+          className="text-center text-slate-600 mt-6"
+        >
           אין לך חשבון?{" "}
           <span className="text-amber-700 font-semibold cursor-pointer hover:underline">
             צור אחד כאן
           </span>
         </p>
+
       </div>
     </div>
   );
