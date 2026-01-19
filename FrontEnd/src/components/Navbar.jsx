@@ -6,17 +6,18 @@ export default function Navbar() {
 
   return (
     <nav
-     dir="rtl"
-      className="sticky top-0 z-50
-             bg-gradient-to-r from-amber-200 via-amber-100 to-stone-200
-             border-b border-amber-300/40 shadow-sm"
-    >
+  dir="rtl"
+  className="sticky top-0 z-50
+             bg-stone-800 text-stone-100
+             shadow-md"
+>
 
-      <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+
+        <div className="max-w-6xl mx-auto px-6 h-16 flex flex-row-reverse items-center justify-between">
         {/* Logo */}
         <Link
           to="/"
-          className="text-2xl font-bold text-amber-700 tracking-tight"
+        className="sticky top-0 z-50 bg-stone-800/95 backdrop-blur shadow-md"
         >
           DevSecJobs
         </Link>
@@ -28,8 +29,8 @@ export default function Navbar() {
             className={({ isActive }) =>
               `text-sm font-semibold transition ${
                 isActive
-                  ? "text-amber-700"
-                  : "text-slate-700 hover:text-amber-700"
+                  ? "text-stone-200"
+                  : "text-slate-700 hover:text-amber-400"
               }`
             }
           >
@@ -42,8 +43,8 @@ export default function Navbar() {
               className={({ isActive }) =>
                 `text-sm font-semibold transition ${
                   isActive
-                    ? "text-amber-700"
-                    : "text-slate-700 hover:text-amber-700"
+                    ? "text-stone-200"
+                    : "text-slate-700 hover:text-amber-400"
                 }`
               }
             >
@@ -58,8 +59,8 @@ export default function Navbar() {
                 className={({ isActive }) =>
                   `text-sm font-semibold transition ${
                     isActive
-                      ? "text-amber-700"
-                      : "text-slate-700 hover:text-amber-700"
+                      ? "text-stone-400"
+                      : "text-slate-700 hover:text-stone-400"
                   }`
                 }
               >
