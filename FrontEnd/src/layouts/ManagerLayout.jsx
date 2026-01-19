@@ -5,9 +5,10 @@ export default function ManagerLayout() {
 
   return (
     <div
-      dir="rtl"
-        className="min-h-screen bg-slate-50 text-slate-800"
+         dir="rtl"
+        className="min-h-screen bg-gradient-to-b from-amber-100 to-stone-300 text-slate-800"
     >
+
       <div className="p-10">
         {/* Top bar כללי למנהל */}
         <div className="max-w-6xl mx-auto flex items-center justify-between mb-10
