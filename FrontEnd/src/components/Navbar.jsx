@@ -8,7 +8,7 @@ export default function Navbar() {
     <nav
   dir="rtl"
   className="sticky top-0 z-50
-             bg-stone-800 text-stone-100
+             bg-gradient-to-r from-amber-400 to-stone-50 text-stone-100
              shadow-md"
 >
 
