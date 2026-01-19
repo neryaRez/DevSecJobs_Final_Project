@@ -1,10 +1,5 @@
 pipeline {
   agent any
-  options {
-    timestamps()
-    disableConcurrentBuilds()
-    ansiColor('xterm')
-  }
 
   environment {
     AWS_REGION = 'us-east-1'
