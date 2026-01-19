@@ -6,10 +6,12 @@ export default function Navbar() {
 
   return (
     <nav
-      dir="rtl"
-      className="sticky top-0 z-50 bg-white/90 backdrop-blur
-                 border-b border-slate-200"
+     dir="rtl"
+      className="sticky top-0 z-50
+             bg-gradient-to-r from-amber-200 via-amber-100 to-stone-200
+             border-b border-amber-300/40 shadow-sm"
     >
+
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link
