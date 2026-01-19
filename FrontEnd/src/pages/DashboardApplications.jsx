@@ -29,7 +29,7 @@ export default function DashboardApplications() {
   }, [user]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-gray-100 to-blue-200 p-6">
+    <div className="bg-white/70 border border-slate-200 rounded-2xl p-6 shadow-sm">
       <h1 className="text-4xl font-assistant text-gray-800 text-center mb-10">
         מועמדויות למשרות שפרסמת 📄
       </h1>

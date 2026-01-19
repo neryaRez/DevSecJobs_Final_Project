@@ -36,7 +36,7 @@ export default function ManagerLayout() {
         </div>
 
         {/* תוכן העמודים של המנהל יושב כאן */}
-        <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow p-8">
+        <div className="max-w-6xl mx-auto w-full bg-white rounded-2xl shadow p-8">
                  <Outlet />
         </div>
 
