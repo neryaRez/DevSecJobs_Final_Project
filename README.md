@@ -187,6 +187,8 @@ This repo already demonstrates strong foundations. Future hardening ideas:
 
 ---
 
-## Contact
+## Developed by
 
-If you want to discuss the design, CI/CD, or EKS architecture — feel free to reach out.
+Nerya Reznickovich
+Yuval Mashiach 
+Shay Rachamim
