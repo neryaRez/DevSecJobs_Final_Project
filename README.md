@@ -23,7 +23,15 @@ This project demonstrates practical DevSecOps capabilities, including:
 
 ## What the system does
 
-**DevSecJobs** is a job platform focused on DevOps/Security roles.
+**DevSecJobs** is a cloud-based job platform designed for professionals in the DevOps and Security domains.
+The product is intended for job seekers looking for DevOps, Cloud, and Security roles, and provides a centralized
+environment for discovering relevant positions, managing applications, and interacting with job postings in a
+focused and domain-specific context.
+
+The system runs as a cloud-native application on AWS EKS and is designed to demonstrate how a modern, scalable,
+and observable platform can be built and operated in a production-like environment. The emphasis is on clean
+architecture, operational reliability, and DevSecOps best practices, rather than on UI complexity.
+
 
 ### Frontend
 - **React (Vite)** client application
