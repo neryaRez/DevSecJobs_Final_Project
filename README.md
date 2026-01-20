@@ -10,9 +10,9 @@ http://k8s-devsecjo-devsecjo-8cd4d7c18e-849609165.us-east-1.elb.amazonaws.com/
 
 ---
 
-## Why this project matters (for recruiters)
+## System Objectives
 
-This repository showcases practical DevSecOps skills:
+This project demonstrates practical DevSecOps capabilities, including:
 - Designing a **containerized micro‑stack** (frontend, backend, database)
 - Deploying and operating it on **Kubernetes (EKS)**
 - Managing infrastructure with **Terraform (IaC)**
@@ -148,31 +148,15 @@ Devops/
     eks/                   # Terraform for EKS infrastructure
     jenkins/               # Terraform for Jenkins host (EC2 + bootstrap)
     monitoring/            # Terraform + Helm for Prometheus/Grafana
+Jenkinsfile    
 ```
 
 ---
 
-## Screenshots (recommended)
-
-**Yes — screenshots are worth it** *if you keep it minimal and professional*:
-- ✅ 1 screenshot of the **Home page**
-- ✅ 1 screenshot of **Grafana (namespace dashboard)**
-
-That’s not “too flashy”; it demonstrates **real operational visibility** (a big plus in interviews).
-
-Suggested layout:
-- Put images under: `docs/images/`
-- Embed here:
-
-```md
-## Screenshots
-
-### Application UI
 ![DevSecJobs Home](docs/images/devsecjobs-home.png)
 
-### Observability (Grafana)
 ![Grafana - Namespace Dashboard](docs/images/grafana-namespace.png)
-```
+
 
 ---
 
