@@ -1,4 +1,4 @@
-# DevSecJobs — Full‑Stack DevSecOps Job Platform 🚀
+# DevSecJobs — Full‑Stack DevSecOps Job Platform 
 
 A production‑style, cloud‑native project that demonstrates **end‑to‑end delivery**:  
 **code → build → push → deploy → observe**, running on **AWS EKS** with **Terraform**, **Kubernetes**, **Docker**, **Jenkins**, and **Prometheus/Grafana**.
