@@ -173,6 +173,6 @@ This repo already demonstrates strong foundations. Future hardening ideas:
 
 ## Developed by
 
--Nerya Reznickovich
--Yuval Mashiach 
--Shay Rachamim
+Nerya Reznickovich<br>
+Yuval Mashiach<br>
+Shay Rachamim
