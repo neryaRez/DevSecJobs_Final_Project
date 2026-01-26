@@ -87,10 +87,10 @@ return (
                     <span>{score === null || Number.isNaN(score) ? "N/A" : `${scorePct}/100`}</span>
                   </div>
                   <div className="mt-2 h-2 w-full rounded-full bg-slate-100 overflow-hidden">
-                    <div
-                      className="h-full rounded-full bg-slate-900"
-                      style={{ width: `${scorePct}%` }}
-                    />
+                   <div
+                    className="h-full rounded-full bg-amber-500 transition-all duration-500"
+                    style={{ width: `${scorePct}%` }}
+                  />
                   </div>
                 </div>
 
@@ -109,8 +109,12 @@ return (
                 </div>
 
                 <div className="mt-4 flex gap-2">
-                  <button className="rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold hover:bg-slate-50">
+                  <button className="rounded-xl bg-amber-500 px-3 py-2 text-sm font-semibold text-white hover:bg-amber-600">
                     View Job
+                  </button>
+
+                  <button className="rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold hover:bg-slate-50">
+                    Details
                   </button>
                 </div>
               </CardContent>

@@ -8,9 +8,10 @@ export default function StatusBadge({ value }) {
   const key = (value || "").toLowerCase();
   const cls = MAP[key] || "bg-slate-50 text-slate-700 border-slate-200";
 
-  return (
-    <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold ${cls}`}>
-      {value || "unknown"}
-    </span>
-  );
+return (
+  <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold ring-1 ring-amber-100 ${cls}`}>
+    {value || "unknown"}
+  </span>
+);
+
 }

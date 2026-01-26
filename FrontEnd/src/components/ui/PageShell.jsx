@@ -1,6 +1,6 @@
 export default function PageShell({ title, subtitle, actions, children }) {
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
+    <div className="min-h-screen bg-gradient-to-b from-amber-50 via-slate-50 to-white text-slate-900">
       <div className="max-w-6xl mx-auto px-6 py-8">
         <div className="mb-6 flex items-start justify-between gap-4">
           <div>
