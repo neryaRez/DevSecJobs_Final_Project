@@ -19,7 +19,7 @@ export default function UserHome() {
       onClick: () => navigate("/jobs-feed"),
     },
     {
-      title: "Complete Profile",
+      title: "Update Profile",
       subtitle: "Boost your match score with better data",
       emoji: "✨",
       onClick: () => navigate("/complete-profile"),
