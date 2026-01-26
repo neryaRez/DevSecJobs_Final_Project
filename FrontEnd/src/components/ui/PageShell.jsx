@@ -1,0 +1,19 @@
+export default function PageShell({ title, subtitle, actions, children }) {
+  return (
+    <div className="min-h-screen bg-slate-50 text-slate-900">
+      <div className="max-w-6xl mx-auto px-6 py-8">
+        <div className="mb-6 flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
+            {subtitle && (
+              <p className="mt-1 text-sm text-slate-600">{subtitle}</p>
+            )}
+          </div>
+          {actions && <div className="shrink-0">{actions}</div>}
+        </div>
+
+        {children}
+      </div>
+    </div>
+  );
+}
