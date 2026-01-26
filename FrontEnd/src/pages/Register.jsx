@@ -56,7 +56,7 @@ export default function Register() {
         className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md text-right"
       >
 
-        <h1 className="text-3xl font-bold text-amber-800 text-center mb-6">
+        <h1 className="text-3xl font-bold text-amber-700 text-center mb-6">
           הרשמה 📝
         </h1>
 
@@ -125,7 +125,7 @@ export default function Register() {
 
         <p dir="rtl" className="text-center text-gray-600 mt-4">
           כבר יש לך חשבון?{" "}
-          <a href="/login" className="text-purple-600 hover:underline">
+          <a href="/login" className="text-amber-700 hover:underline">
             התחבר כאן
           </a>
         </p>
