@@ -45,11 +45,17 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-100 to-stone-300 p-4">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white rounded-xl shadow-xl p-8 w-full max-w-md"
+      <div
+        dir="rtl"
+        className="min-h-screen bg-gradient-to-br from-amber-100 to-stone-300 text-slate-800
+             flex items-center justify-center p-4"
       >
+      <form
+        dir="rtl"
+        onSubmit={handleSubmit}
+        className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md text-right"
+      >
+
         <h1 className="text-3xl font-bold text-amber-800 text-center mb-6">
           הרשמה 📝
         </h1>
@@ -117,7 +123,7 @@ export default function Register() {
           {loading ? "נרשם..." : "צור חשבון"}
         </button>
 
-        <p className="text-center text-gray-600 mt-4">
+        <p dir="rtl" className="text-center text-gray-600 mt-4">
           כבר יש לך חשבון?{" "}
           <a href="/login" className="text-purple-600 hover:underline">
             התחבר כאן
