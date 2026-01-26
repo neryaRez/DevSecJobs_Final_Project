@@ -36,21 +36,36 @@ export default function Navbar() {
           >
             Home
           </NavLink>
+{user?.is_admin && (
+  <NavLink
+    to="/dashboard"
+    className={({ isActive }) =>
+      `text-sm font-semibold transition ${
+        isActive
+          ? "text-stone-400"
+          : "text-slate-700 hover:text-stone-400"
+      }`
+    }
+  >
+    Dashboard
+  </NavLink>
+)}
 
-          {user && (
-            <NavLink
-              to="/dashboard"
-              className={({ isActive }) =>
-                `text-sm font-semibold transition ${
-                  isActive
-                    ? "text-stone-400"
-                    : "text-slate-700 hover:text-stone-400"
-                }`
-              }
-            >
-              Dashboard
-            </NavLink>
-          )}
+{user && !user.is_admin && (
+  <NavLink
+    to="/user-home"
+    className={({ isActive }) =>
+      `text-sm font-semibold transition ${
+        isActive
+          ? "text-stone-400"
+          : "text-slate-700 hover:text-stone-400"
+      }`
+    }
+  >
+    My Area
+  </NavLink>
+)}
+
 
           {!user ? (
             <>

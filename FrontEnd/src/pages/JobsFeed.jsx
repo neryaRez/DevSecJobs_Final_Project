@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import api from "../api/client.js";
 import { useAuth } from "../context/AuthContext.jsx";
+import PageShell from "../components/ui/PageShell";
+import Card, { CardHeader, CardContent } from "../components/ui/Card";
+
 
 export default function JobsFeed() {
   const { user } = useAuth();
@@ -61,40 +64,74 @@ export default function JobsFeed() {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-r from-gray-200 to-blue-300 p-6">
-      <br />
-      {loading ? (
-        <p className="text-center text-gray-600">טוען משרות…</p>
-      ) : jobs.length === 0 ? (
-        <p className="text-center text-gray-600">אין משרות כרגע.</p>
-      ) : (
-        <div className="grid gap-6 max-w-3xl mx-auto">
-          {jobs.map((job) => (
-            <div
-              key={job.id}
-              className="bg-gradient-to-r from-yellow-200 to-green-300 rounded-xl shadow hover:shadow-xl transition p-6"
-            >
-              <h2 className="text-2xl font-semibold text-gray-800">{job.title}</h2>
-              <p className="text-gray-500 mt-1">
-                {job.work_location || "מיקום לא צוין"} · {job.employment_type || "היקף לא צוין"}
-              </p>
-              <p className="text-gray-700 mt-3">{job.description}</p>
-              <button
-                onClick={() => applyToJob(job.id)}
-                disabled={hasApplied(job.id)}
-                className={`mt-4 px-5 py-2 rounded-lg text-white transition ${
-                  hasApplied(job.id)
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-gradient-to-r from-purple-600 to-pink-500 hover:scale-105 hover:shadow-lg"
-                }`}
-              >
-                {hasApplied(job.id) ? "כבר הוגשה מועמדות" : "הגש מועמדות"}
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
+return (
+  <PageShell
+    title="Jobs Feed"
+    subtitle="Explore open roles and apply in one click."
+  >
+    {loading ? (
+      <p className="text-slate-600 text-center">Loading jobs…</p>
+    ) : jobs.length === 0 ? (
+      <p className="text-slate-600 text-center">No jobs available right now.</p>
+    ) : (
+      <div className="grid gap-4 max-w-4xl mx-auto">
+        {jobs.map((job) => {
+          const applied = hasApplied(job.id);
+
+          return (
+            <Card key={job.id}>
+              <CardHeader className="flex items-start justify-between gap-4">
+                <div className="min-w-0">
+                  <div className="text-lg font-semibold truncate">{job.title}</div>
+                  <div className="mt-1 text-sm text-slate-600">
+                    {(job.work_location || "Location N/A")} ·{" "}
+                    {(job.employment_type || "Type N/A")}
+                  </div>
+                </div>
+
+                {/* Badge קטן */}
+                <span
+                  className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold ${
+                    applied
+                      ? "bg-slate-100 text-slate-600 border-slate-200"
+                      : "bg-amber-50 text-amber-700 border-amber-200"
+                  }`}
+                >
+                  {applied ? "Applied" : "Open"}
+                </span>
+              </CardHeader>
+
+              <CardContent>
+                <p className="text-slate-700">{job.description}</p>
+
+                <div className="mt-4 flex items-center gap-2">
+                  <button
+                    onClick={() => applyToJob(job.id)}
+                    disabled={applied}
+                    className={`rounded-xl px-4 py-2 text-sm font-semibold text-white transition ${
+                      applied
+                        ? "bg-slate-400 cursor-not-allowed"
+                        : "bg-amber-600 hover:bg-amber-700 shadow-sm"
+                    }`}
+                  >
+                    {applied ? "Already applied" : "Apply"}
+                  </button>
+
+                  <button
+                    type="button"
+                    className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold
+                               hover:bg-slate-50 transition"
+                  >
+                    Details
+                  </button>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+    )}
+  </PageShell>
+);
+
 }

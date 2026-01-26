@@ -1,49 +1,65 @@
-// 📁 src/pages/UserHome.jsx
 import { useNavigate } from "react-router-dom";
+import PageShell from "../components/ui/PageShell";
+import Card, { CardHeader, CardContent } from "../components/ui/Card";
 
 export default function UserHome() {
   const navigate = useNavigate();
 
   const cards = [
     {
-      title: "המועמדויות שלי 📄",
-      desc: "צפה ונהל את כל המשרות שהגשת אליהן",
-      color: "from-purple-400 to-pink-500",
+      title: "My Applications",
+      subtitle: "Track statuses, match score, and history",
+      emoji: "📄",
       onClick: () => navigate("/my-applications"),
     },
     {
-      title: "המגייסים שלי 👥",
-      desc: "נהל את הקשר שלך עם המגייסים במערכת",
-      color: "from-green-400 to-blue-500",
-      onClick: () => navigate("/recruiters"),
+      title: "Jobs Feed",
+      subtitle: "Explore open roles and apply quickly",
+      emoji: "📢",
+      onClick: () => navigate("/jobs-feed"),
     },
     {
-      title: "משרות פתוחות 📢",
-      desc: "צפה בכל המשרות הפתוחות והגש מועמדות",
-      color: "from-yellow-400 to-red-300",
-      onClick: () => navigate("/jobs-feed"),
+      title: "Complete Profile",
+      subtitle: "Boost your match score with better data",
+      emoji: "✨",
+      onClick: () => navigate("/complete-profile"),
     },
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-gray-200 to-blue-300 p-10">
-      <h1 className="text-4xl font-assistant text-gray-800 text-center mb-12">
-        Welcome to DevSecJobs! 🚀
-      </h1>
-
-      {/* שלוש כרטיסיות יפות */}
-      <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-        {cards.map((card, i) => (
-          <div
-            key={i}
-            onClick={card.onClick}
-            className={`cursor-pointer bg-gradient-to-r ${card.color} rounded-2xl shadow-lg hover:scale-105 hover:shadow-2xl transition p-8 text-white`}
+    <PageShell
+      title="Candidate Area"
+      subtitle="Your personal dashboard for jobs, applications, and profile."
+    >
+      <div className="grid md:grid-cols-3 gap-4">
+        {cards.map((c) => (
+          <button
+            key={c.title}
+            onClick={c.onClick}
+            className="text-left"
+            type="button"
           >
-            <h2 className="text-2xl font-bold mb-3">{card.title}</h2>
-            <p className="text-white/90">{card.desc}</p>
-          </div>
+            <Card className="h-full hover:-translate-y-0.5 transition">
+              <CardHeader className="flex items-start justify-between gap-4">
+                <div className="min-w-0">
+                  <div className="text-lg font-semibold">{c.title}</div>
+                  <div className="mt-1 text-sm text-slate-600 line-clamp-2">
+                    {c.subtitle}
+                  </div>
+                </div>
+                <div className="text-2xl">{c.emoji}</div>
+              </CardHeader>
+
+              <CardContent>
+                <div className="mt-2 inline-flex items-center gap-2 text-sm font-semibold text-amber-700">
+                  <span>Open</span>
+                  <span>→</span>
+                </div>
+              </CardContent>
+            </Card>
+          </button>
         ))}
       </div>
-    </div>
+    </PageShell>
   );
 }
