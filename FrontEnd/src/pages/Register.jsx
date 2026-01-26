@@ -79,6 +79,9 @@ export default function Register() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
+            className="w-full border border-slate-200 rounded-xl px-4 py-3 mb-5
+                       text-left
+                       focus:outline-none focus:ring-2 focus:ring-amber-300"
           />
 
           {/* סיסמה */}
