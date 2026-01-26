@@ -50,47 +50,52 @@ export default function Register() {
         onSubmit={handleSubmit}
         className="bg-white rounded-xl shadow-xl p-8 w-full max-w-md"
       >
-        <h1 className="text-3xl font-bold text-gray-800 text-center mb-6">
+        <h1 className="text-3xl font-bold text-amber-800 text-center mb-6">
           הרשמה 📝
         </h1>
 
-        <div className="mb-4">
-          <label className="block text-gray-700 font-medium mb-1">
+          {/* שם משתמש */}
+          <label className="block text-sm font-semibold text-slate-700 mb-2">
             שם משתמש
           </label>
           <input
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-400 focus:outline-none"
-            placeholder="בחר שם משתמש"
-            required
+            placeholder="הכנס שם משתמש"
+            className="w-full border border-slate-200 rounded-xl px-4 py-3 mb-5
+                       focus:outline-none focus:ring-2 focus:ring-amber-300"
           />
-        </div>
 
-        <div className="mb-4">
-          <label className="block text-gray-700 font-medium mb-1">אימייל</label>
+          {/* אימייל */}
+          <label className="block text-sm font-semibold text-slate-700 mb-2">
+            אימייל
+          </label>
           <input
             type="email"
+            dir="ltr"
+            inputMode="email"
+            autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-400 focus:outline-none"
             placeholder="you@example.com"
-            required
           />
-        </div>
 
-        <div className="mb-6">
-          <label className="block text-gray-700 font-medium mb-1">סיסמה</label>
+          {/* סיסמה */}
+          <label className="block text-sm font-semibold text-slate-700 mb-2">
+            סיסמה
+          </label>
           <input
             type="password"
+            dir="ltr"
+            autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-400 focus:outline-none"
             placeholder="••••••••"
-            required
+            className="w-full border border-slate-200 rounded-xl px-4 py-3 mb-6
+                       text-left
+                       focus:outline-none focus:ring-2 focus:ring-amber-300"
           />
-        </div>
 
         <div className="mb-6 flex items-center gap-2">
           <input
@@ -104,7 +109,7 @@ export default function Register() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2 rounded-lg font-semibold hover:scale-105 hover:shadow-lg transition disabled:opacity-50"
+          className="w-full bg-gradient-to-r from-amber-400 to-amber-600 text-white py-2 rounded-lg font-semibold hover:scale-105 hover:shadow-lg transition disabled:opacity-50"
         >
           {loading ? "נרשם..." : "צור חשבון"}
         </button>
