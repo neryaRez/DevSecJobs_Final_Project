@@ -86,10 +86,10 @@ function Home({ handsImg }) {
         <div className="max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
           <div>
             <h1 className="text-5xl font-extrabold leading-tight">
-              חודי אוהב פיצה
+             Build Your DevSecOps Career
             </h1>
             <p className="mt-6 text-lg text-amber-700">
-              Connecting DevOps & Security professionals with companies that value excellence!!
+              Connecting DevSecOps & Security professionals with companies that value excellence
             </p>
           </div>
 
