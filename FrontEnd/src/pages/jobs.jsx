@@ -302,8 +302,8 @@ export default function Jobs() {
 
                       <button
                         onClick={() => deleteJob(job.id)}
-                        className="rounded-xl bg-rose-600 px-3 py-2 text-sm font-semibold text-white
-                                   hover:bg-rose-700 transition"
+                        className="rounded-xl bg-amber-400 px-3 py-2 text-sm font-semibold text-white
+                                   hover:bg-amber-700 transition"
                         type="button"
                       >
                         Delete
