@@ -2,16 +2,11 @@ pipeline {
   agent any
 
   environment {
-    AWS_REGION = 'us-east-1'
-    NAMESPACE  = 'devsecjobs'
 
-    ACCOUNT_ID = '455715798206'
+    NAMESPACE  = 'devsecjobs'
 
     FE_REPO = 'devsecjobs-frontend'
     BE_REPO = 'devsecjobs-backend'
-
-    FE_ECR = "${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${FE_REPO}"
-    BE_ECR = "${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${BE_REPO}"
 
     FE_DEPLOYMENT = 'frontend-deployment'
     FE_CONTAINER  = 'frontend'
@@ -24,6 +19,33 @@ pipeline {
   }
 
   stages {
+
+    stage('Resolve AWS Region & ECR URIs (Generic)') {
+      steps {
+        script {
+          def region = sh(script: 'aws configure get region', returnStdout: true).trim()
+          if (!region) {
+            error "AWS region is not configured in AWS CLI. Run: aws configure set region <your-region> (on the Jenkins agent)."
+          }
+          env.AWS_REGION = region
+
+          def accountId = sh(
+            script: 'aws sts get-caller-identity --query Account --output text',
+            returnStdout: true
+          ).trim()
+          env.ACCOUNT_ID = accountId
+
+          env.FE_ECR = "${env.ACCOUNT_ID}.dkr.ecr.${env.AWS_REGION}.amazonaws.com/${env.FE_REPO}"
+          env.BE_ECR = "${env.ACCOUNT_ID}.dkr.ecr.${env.AWS_REGION}.amazonaws.com/${env.BE_REPO}"
+          echo "Resolved AWS context:"
+          echo " - AWS_REGION=${env.AWS_REGION}"
+          echo " - ACCOUNT_ID=${env.ACCOUNT_ID}"
+          echo " - FE_ECR=${env.FE_ECR}"
+          echo " - BE_ECR=${env.BE_ECR}"
+        }
+      }
+    }
+
 
     stage('Checkout') {
       steps {
@@ -45,10 +67,14 @@ pipeline {
     stage('Detect Changes') {
       steps {
         script {
-          def base = env.GIT_PREVIOUS_SUCCESSFUL_COMMIT
-          if (!base?.trim()) {
+          def base = env.GIT_PREVIOUS_SUCCESSFUL_COMMIT?.trim()
+          if (!base) {
             base = sh(script: "git rev-parse HEAD~1 || true", returnStdout: true).trim()
           }
+          if(!base){
+            base = sh(script: "git rev-list --max-parents=0 HEAD", returnStdout: true).trim()
+          }
+          echo "Diff base commit: ${base}"
 
           def changed = sh(
             script: "git diff --name-only ${base}..HEAD || true",
@@ -65,14 +91,21 @@ pipeline {
       }
     }
 
+    stage('No Changes?') {
+      when {
+        expression { return env.CHANGED_FRONTEND == "false" && env.CHANGED_BACKEND == "false" }
+      }
+      steps {
+        echo "No changes detected in FrontEnd/Backend. Skipping build & deploy."
+      }
+    }
+
     stage('Preflight: Tools & Cluster Access') {
       steps {
         sh '''
           set -e
           aws --version
           docker --version
-
-          docker buildx version
 
           curl --version
 
@@ -89,7 +122,6 @@ pipeline {
       steps {
         sh '''
           set -e
-          aws sts get-caller-identity
           aws ecr get-login-password --region "${AWS_REGION}" \
             | docker login --username AWS --password-stdin "${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com" >/dev/null
         '''
@@ -102,7 +134,7 @@ pipeline {
       steps {
         sh '''
           set -e
-          echo "Building FRONTEND (buildx):"
+          echo "Building FRONTEND:"
           echo " - ${FE_ECR}:${IMAGE_TAG}"
           cd FrontEnd
 
@@ -117,7 +149,7 @@ pipeline {
       steps {
         sh '''
           set -e
-          echo "Building BACKEND (buildx):"
+          echo "Building BACKEND:"
           echo " - ${BE_ECR}:${IMAGE_TAG}"
           cd Backend
 
@@ -138,7 +170,7 @@ pipeline {
             -n "${NAMESPACE}"
 
           echo "Waiting for FRONTEND rollout..."
-          kubectl rollout status "deployment/${FE_DEPLOYMENT}" -n "${NAMESPACE}"
+          kubectl rollout status "deployment/${FE_DEPLOYMENT}" -n "${NAMESPACE}" --timeout=5m
 
           echo "Verify FRONTEND image:"
           kubectl get deploy "${FE_DEPLOYMENT}" -n "${NAMESPACE}" \
@@ -158,7 +190,7 @@ pipeline {
             -n "${NAMESPACE}"
 
           echo "Waiting for BACKEND rollout..."
-          kubectl rollout status "deployment/${BE_DEPLOYMENT}" -n "${NAMESPACE}"
+          kubectl rollout status "deployment/${BE_DEPLOYMENT}" -n "${NAMESPACE}" --timeout=5m
 
           echo "Verify BACKEND image:"
           kubectl get deploy "${BE_DEPLOYMENT}" -n "${NAMESPACE}" \
